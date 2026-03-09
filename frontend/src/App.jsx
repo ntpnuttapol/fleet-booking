@@ -45,7 +45,7 @@ function useWindowWidth() {
 }
 
 const font = `'Noto Sans Thai', 'DM Sans', system-ui, sans-serif`;
-const C = { bg: "#F5F5F7", card: "#FFFFFF", sidebar: "#FFFFFF", accent: "#000000", accentLight: "#E5E5E5", border: "#E5E5EA", t1: "#1D1D1F", t2: "#86868B", t3: "#AEAEB2", danger: "#FF3B30", success: "#34C759", warn: "#FF9500" };
+const C = { bg: "#F4F6FB", card: "#FFFFFF", sidebar: "#FFFFFF", accent: "#6366F1", accentLight: "#E0E7FF", border: "#E2E8F0", t1: "#0F172A", t2: "#475569", t3: "#94A3B8", danger: "#EF4444", success: "#10B981", warn: "#F59E0B" };
 
 // ─── Confirm Dialog ──────────────────────────────────────────
 function ConfirmDialog({ title, message, confirmLabel, confirmColor, onConfirm, onCancel, icon }) {
@@ -182,6 +182,7 @@ export default function App() {
 
   // Initial Resource Load
   useEffect(() => {
+    if (!currentUser) return; // Only fetch data when logged in
     const token = localStorage.getItem('fleetbook_token');
     const headers = token ? { "Authorization": `Bearer ${token}` } : {};
     Promise.all([
@@ -193,7 +194,7 @@ export default function App() {
       setUsers(Array.isArray(usersData) ? usersData : []);
       setBookings(Array.isArray(bookingsData) ? bookingsData : []);
     }).catch(console.error);
-  }, []);
+  }, [currentUser]);
 
   // Auto Logout on Idle (15 minutes)
   useEffect(() => {
@@ -549,7 +550,7 @@ function LoginPage({ form, setForm, error, onLogin, isMobile }) {
         {error && <div style={{ background: "rgba(255,59,48,0.1)", border: "1px solid rgba(255,59,48,0.2)", borderRadius: 12, padding: "10px 14px", marginBottom: 16, color: C.danger, fontSize: 13, fontWeight: 500 }}>{error}</div>}
         <div style={{ marginBottom: 14 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล หรือ ชื่อผู้ใช้งาน</label><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com หรือ somchai_admin" style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
         <div style={{ marginBottom: 24 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>รหัสผ่าน</label><input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••" onKeyDown={e => e.key === "Enter" && onLogin()} style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
-        <button onClick={onLogin} style={{ width: "100%", padding: "12px", background: C.t1, color: "#fff", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: font }}>เข้าสู่ระบบ</button>
+        <button onClick={onLogin} style={{ width: "100%", padding: "12px", background: C.accent, color: "#fff", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: font }}>เข้าสู่ระบบ</button>
       </div>
     </div>
   );
@@ -806,7 +807,7 @@ function Bookings({ bookings, cars, users, onApprove, onReject, onCancel, m }) {
               </div>
               <div style={{ display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap", ...(m ? { width: "100%" } : {}) }}>
                 {b.status === "pending" && <>
-                  <button onClick={() => onApprove(b.id)} style={{ flex: m ? 1 : "none", padding: "7px 16px", borderRadius: 7, border: "none", background: C.t1, color: "#fff", fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font }}>อนุมัติ</button>
+                  <button onClick={() => onApprove(b.id)} style={{ flex: m ? 1 : "none", padding: "7px 16px", borderRadius: 7, border: "none", background: C.success, color: "#fff", fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font }}>อนุมัติ</button>
                   <button onClick={() => onReject(b.id)} style={{ flex: m ? 1 : "none", padding: "7px 16px", borderRadius: 7, border: `1px solid ${C.border}`, background: "transparent", color: C.t2, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font }}>ปฏิเสธ</button>
                 </>}
                 {canCancel && <button onClick={() => onCancel(b.id)} style={{ flex: m ? 1 : "none", padding: "7px 16px", borderRadius: 7, border: `1px solid ${C.border}`, background: "#fff", color: C.danger, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>}
@@ -841,7 +842,7 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
         <div><h1 style={{ fontSize: m ? 20 : 26, fontWeight: 800, margin: 0 }}>{isAdmin ? "จัดการรถ" : "จองรถ"}</h1><p style={{ color: C.t2, fontSize: 13, margin: "4px 0 0" }}>{isAdmin ? "รายการรถทั้งหมด" : "เลือกรถที่ต้องการจอง"}</p></div>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ display: "flex", gap: 4, background: C.card, borderRadius: 9, padding: 3, border: `1px solid ${C.border}`, overflowX: "auto" }}>
-            {types.map(t => (<button key={t} onClick={() => setFilter(t)} style={{ padding: "6px 14px", borderRadius: 7, border: "none", background: filter === t ? C.t1 : "transparent", color: filter === t ? "#fff" : C.t2, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font, whiteSpace: "nowrap" }}>{tl[t] || t}</button>))}
+            {types.map(t => (<button key={t} onClick={() => setFilter(t)} style={{ padding: "6px 14px", borderRadius: 7, border: "none", background: filter === t ? C.accent : "transparent", color: filter === t ? "#fff" : C.t2, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font, whiteSpace: "nowrap" }}>{tl[t] || t}</button>))}
           </div>
           {isAdmin && (
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -883,7 +884,7 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
                     </button>
                   </div>
                 )}
-                <button onClick={() => !isDisabled && onBook(car)} disabled={isDisabled} style={{ width: "100%", padding: "9px", borderRadius: 9, border: "none", fontFamily: font, background: !isDisabled ? C.t1 : "#F5F5F7", color: !isDisabled ? "#fff" : C.t3, fontWeight: 700, fontSize: 12, cursor: !isDisabled ? "pointer" : "not-allowed" }}>{!avail ? "ไม่พร้อมใช้งาน" : active ? "ถูกจองแล้ว" : hasActiveBooking ? "จำกัด 1 คัน/คน" : "จองรถคันนี้"}</button>
+                <button onClick={() => !isDisabled && onBook(car)} disabled={isDisabled} style={{ width: "100%", padding: "9px", borderRadius: 9, border: "none", fontFamily: font, background: !isDisabled ? C.accent : "#F5F5F7", color: !isDisabled ? "#fff" : C.t3, fontWeight: 700, fontSize: 12, cursor: !isDisabled ? "pointer" : "not-allowed" }}>{!avail ? "ไม่พร้อมใช้งาน" : active ? "ถูกจองแล้ว" : hasActiveBooking ? "จำกัด 1 คัน/คน" : "จองรถคันนี้"}</button>
               </div>
             </div>
           );
@@ -922,7 +923,7 @@ function BookingModal({ car, onClose, onSubmit, m, blackouts }) {
         <div style={{ marginBottom: 20 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วัตถุประสงค์</label><textarea value={f.purpose} onChange={e => setF({ ...f, purpose: e.target.value })} rows={3} placeholder="เช่น พบลูกค้า, ขนส่งสินค้า..." style={{ width: "100%", padding: "9px 12px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, resize: "vertical", background: "#F5F5F7", color: C.t1 }} /></div>
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} disabled={loading} style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 9, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 13, cursor: loading ? "not-allowed" : "pointer", fontFamily: font }}>ยกเลิก</button>
-          <button onClick={handleSubmit} disabled={!f.startDate || !f.endDate || !f.purpose || !!blocked || loading} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, fontFamily: font, background: f.startDate && f.endDate && f.purpose && !blocked && !loading ? C.t1 : "#E5E5EA", color: f.startDate && f.endDate && f.purpose && !blocked && !loading ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.startDate && f.endDate && f.purpose && !blocked && !loading ? "pointer" : "not-allowed" }}>{loading ? "กำลังส่งคำขอ..." : "ส่งคำขอจอง"}</button>
+          <button onClick={handleSubmit} disabled={!f.startDate || !f.endDate || !f.purpose || !!blocked || loading} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, fontFamily: font, background: f.startDate && f.endDate && f.purpose && !blocked && !loading ? C.accent : "#E5E5EA", color: f.startDate && f.endDate && f.purpose && !blocked && !loading ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.startDate && f.endDate && f.purpose && !blocked && !loading ? "pointer" : "not-allowed" }}>{loading ? "กำลังส่งคำขอ..." : "ส่งคำขอจอง"}</button>
         </div>
       </div>
     </div>
