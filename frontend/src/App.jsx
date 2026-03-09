@@ -984,11 +984,22 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
   );
 }
 
-// ─── Booking Modal ───────────────────────────────────────────
-function BookingModal({ car, onClose, onSubmit, m, blackouts }) {
+// ─── Booking Modal ─────────────────────────────────────────────
+function BookingModal({ car, onClose, onSubmit, blackouts, m }) {
   const [f, setF] = useState({ startDate: "", endDate: "", purpose: "" });
   const [loading, setLoading] = useState(false);
-  const blocked = f.startDate && f.endDate ? blackouts.find(bd => { const d = new Date(bd.date); return d >= new Date(f.startDate) && d <= new Date(f.endDate); }) : null;
+
+  // Split datetime for better cross-platform input support (Windows vs Mac)
+  const sd = (f.startDate || "").split("T")[0] || "";
+  const st = (f.startDate || "").split("T")[1] || "";
+  const ed = (f.endDate || "").split("T")[0] || "";
+  const et = (f.endDate || "").split("T")[1] || "";
+
+  const blocked = blackouts.find(bd => {
+    if (!f.startDate || !f.endDate) return false;
+    const start = new Date(f.startDate); const end = new Date(f.endDate);
+    const d = new Date(bd.date); return d >= start && d <= end;
+  });
 
   const handleSubmit = async () => {
     if (f.startDate && f.endDate && f.purpose && !blocked) {
@@ -1000,17 +1011,32 @@ function BookingModal({ car, onClose, onSubmit, m, blackouts }) {
       }
     }
   };
+
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: m ? "flex-end" : "center", justifyContent: "center", zIndex: 100, animation: "fadeIn 0.2s", backdropFilter: "blur(4px)" }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: m ? "18px 18px 0 0" : 18, padding: m ? "28px 20px 32px" : "28px 32px", width: m ? "100%" : 420, maxHeight: "90vh", overflow: "auto", animation: m ? "slideUp 0.25s" : "scaleIn 0.25s", boxShadow: "0 25px 60px rgba(0,0,0,0.2)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>จองรถ</h2><button onClick={onClose} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: C.t3 }}>✕</button></div>
         <div style={{ display: "flex", alignItems: "center", gap: 14, padding: 14, background: "#F5F5F7", borderRadius: 10, marginBottom: 20, border: `1px solid ${C.border}` }}><span style={{ fontSize: 36 }}>{car.image}</span><div><div style={{ fontWeight: 700, fontSize: 15, color: C.t1 }}>{car.name}</div><div style={{ fontSize: 11, color: C.t2, marginTop: 2 }}>🔖 {car.licensePlate} · 🏷️ {car.type}</div></div></div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วันที่-เวลาเริ่ม</label><input type="datetime-local" value={f.startDate} onChange={e => setF({ ...f, startDate: e.target.value })} style={{ width: "100%", padding: "9px 10px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วันที่-เวลาสิ้นสุด</label><input type="datetime-local" value={f.endDate} onChange={e => setF({ ...f, endDate: e.target.value })} style={{ width: "100%", padding: "9px 10px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
+
+        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: 10, marginBottom: 14 }}>
+          <div>
+            <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วันที่เริ่ม <span style={{ color: C.danger }}>*</span></label>
+            <div style={{ display: "flex", gap: 6 }}>
+              <input type="date" value={sd} onChange={e => setF({ ...f, startDate: e.target.value ? `${e.target.value}T${st || "08:00"}` : "" })} style={{ flex: 3, padding: "9px 10px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, background: "#F5F5F7", color: C.t1 }} />
+              <input type="time" value={st} onChange={e => setF({ ...f, startDate: sd ? `${sd}T${e.target.value || "08:00"}` : "" })} style={{ flex: 2, padding: "9px 8px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, background: "#F5F5F7", color: C.t1 }} disabled={!sd} />
+            </div>
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วันที่สิ้นสุด <span style={{ color: C.danger }}>*</span></label>
+            <div style={{ display: "flex", gap: 6 }}>
+              <input type="date" value={ed} min={sd || undefined} onChange={e => setF({ ...f, endDate: e.target.value ? `${e.target.value}T${et || "18:00"}` : "" })} style={{ flex: 3, padding: "9px 10px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, background: "#F5F5F7", color: C.t1 }} />
+              <input type="time" value={et} onChange={e => setF({ ...f, endDate: ed ? `${ed}T${e.target.value || "18:00"}` : "" })} style={{ flex: 2, padding: "9px 8px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, background: "#F5F5F7", color: C.t1 }} disabled={!ed} />
+            </div>
+          </div>
         </div>
+
         {blocked && <div style={{ padding: "8px 12px", borderRadius: 8, background: "#FEF2F2", border: "1px solid #FECACA", marginBottom: 14, fontSize: 12, color: "#991B1B" }}>🚧 ช่วงวันที่เลือกตรงกับวันห้ามจอง: {blocked.date} — {blocked.reason}</div>}
-        <div style={{ marginBottom: 20 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วัตถุประสงค์</label><textarea value={f.purpose} onChange={e => setF({ ...f, purpose: e.target.value })} rows={3} placeholder="เช่น พบลูกค้า, ขนส่งสินค้า..." style={{ width: "100%", padding: "9px 12px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, resize: "vertical", background: "#F5F5F7", color: C.t1 }} /></div>
+        <div style={{ marginBottom: 20 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วัตถุประสงค์ <span style={{ color: C.danger }}>*</span></label><textarea value={f.purpose} onChange={e => setF({ ...f, purpose: e.target.value })} rows={3} placeholder="เช่น พบลูกค้า, ขนส่งสินค้า..." style={{ width: "100%", padding: "9px 12px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, resize: "vertical", background: "#F5F5F7", color: C.t1 }} /></div>
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} disabled={loading} style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 9, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 13, cursor: loading ? "not-allowed" : "pointer", fontFamily: font }}>ยกเลิก</button>
           <button onClick={handleSubmit} disabled={!f.startDate || !f.endDate || !f.purpose || !!blocked || loading} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, fontFamily: font, background: f.startDate && f.endDate && f.purpose && !blocked && !loading ? C.accent : "#E5E5EA", color: f.startDate && f.endDate && f.purpose && !blocked && !loading ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.startDate && f.endDate && f.purpose && !blocked && !loading ? "pointer" : "not-allowed" }}>{loading ? "กำลังส่งคำขอ..." : "ส่งคำขอจอง"}</button>
