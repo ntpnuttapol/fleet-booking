@@ -1,24 +1,24 @@
 import { useState, useEffect, useRef } from "react";
 
 // ─── Constants ───────────────────────────────────────────────
-const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "https://fleet-booking-app.onrender.com";
+const API_BASE = import.meta.env.DEV ? `http://${window.location.hostname}:3001` : "https://fleet-booking-app.onrender.com";
 
 // ─── Helpers ─────────────────────────────────────────────────
 const STATUS_MAP = {
-  pending: { label: "รอดำเนินการ", bg: "#FEF3C7", text: "#92400E", dot: "#F59E0B" },
-  approved: { label: "อนุมัติแล้ว", bg: "#D1FAE5", text: "#065F46", dot: "#10B981" },
-  rejected: { label: "ไม่อนุมัติ", bg: "#FEE2E2", text: "#991B1B", dot: "#EF4444" },
-  completed: { label: "เสร็จสิ้น", bg: "#E0E7FF", text: "#3730A3", dot: "#6366F1" },
-  cancelled: { label: "ยกเลิกแล้ว", bg: "#F3F4F6", text: "#374151", dot: "#9CA3AF" },
-  available: { label: "ว่าง", bg: "#D1FAE5", text: "#065F46", dot: "#10B981" },
-  booked: { label: "ถูกจอง", bg: "#FEF3C7", text: "#92400E", dot: "#F59E0B" },
-  maintenance: { label: "ซ่อมบำรุง", bg: "#FEE2E2", text: "#991B1B", dot: "#EF4444" },
+  pending: { label: "รออนุมัติ", bg: "#FBF0C4", text: "#8A7520", dot: "#F5E08A" },
+  approved: { label: "อนุมัติ", bg: "#D4F0E7", text: "#3D7A5F", dot: "#A8DCC8" },
+  rejected: { label: "ไม่อนุมัติ", bg: "#F8D7E0", text: "#9C4462", dot: "#F0B0C4" },
+  completed: { label: "เสร็จสิ้น", bg: "#E8E0F0", text: "#6B5B7B", dot: "#C9B8DB" },
+  cancelled: { label: "ยกเลิกแล้ว", bg: "#F0ECE8", text: "#8E847A", dot: "#B8AFA6" },
+  available: { label: "ว่าง", bg: "#D4F0E7", text: "#3D7A5F", dot: "#A8DCC8" },
+  booked: { label: "ใช้งาน", bg: "#D0E8F7", text: "#3A6B8C", dot: "#A7D1ED" },
+  maintenance: { label: "ซ่อมบำรุง", bg: "#F8D7E0", text: "#9C4462", dot: "#F0B0C4" },
 };
 
 const Badge = ({ status }) => {
-  const s = STATUS_MAP[status] || { label: status, bg: "#F3F4F6", text: "#374151", dot: "#9CA3AF" };
+  const s = STATUS_MAP[status] || { label: status, bg: "#F0ECE8", text: "#6B6158", dot: "#B8AFA6" };
   return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "3px 10px", borderRadius: 20, background: s.bg, color: s.text, fontSize: 11, fontWeight: 600 }}>
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 100, background: s.bg, color: s.text, fontSize: 12, fontWeight: 600 }}>
       <span style={{ width: 6, height: 6, borderRadius: "50%", background: s.dot }} />
       {s.label}
     </span>
@@ -45,7 +45,7 @@ function useWindowWidth() {
 }
 
 const font = `'Noto Sans Thai', 'DM Sans', system-ui, sans-serif`;
-const C = { bg: "#F4FAFA", card: "#FFFFFF", sidebar: "#FFFFFF", accent: "#00B49F", accentLight: "#CCF0EC", border: "#E2ECEB", t1: "#1F2937", t2: "#4B5563", t3: "#9CA3AF", danger: "#EF4444", success: "#10B981", warn: "#F59E0B" };
+const C = { bg: "#F1F5F9", card: "#FFFFFF", sidebar: "#1E293B", accent: "#3B82F6", accentLight: "#DBEAFE", border: "#E2E8F0", t1: "#1E293B", t2: "#64748B", t3: "#94A3B8", danger: "#EF4444", success: "#22C55E", warn: "#F59E0B" };
 
 // ─── Confirm Dialog ──────────────────────────────────────────
 function ConfirmDialog({ title, message, confirmLabel, confirmColor, onConfirm, onCancel, icon }) {
@@ -303,7 +303,7 @@ export default function App() {
           setLoginError("");
           setTimeout(() => {
             setCurrentUser(data.user);
-            setPage(data.user.role === "admin" ? "dashboard"กฟก : "cars");
+            setPage(data.user.role === "admin" ? "dashboard" : "cars");
             setLoginSuccess(false);
           }, 400);
         })
@@ -440,22 +440,60 @@ export default function App() {
     });
   };
 
-  const navItems = isAdmin
-    ? [{ key: "dashboard", icon: "📊", label: "แดชบอร์ด" }, { key: "calendar", icon: "📅", label: "ปฏิทิน" }, { key: "cars", icon: "🚗", label: "จัดการ/จองรถ" }, { key: "bookings", icon: "📋", label: "คำขอจอง" }, { key: "mybookings", icon: "🔖", label: "การจองของฉัน" }, { key: "users", icon: "👥", label: "จัดการผู้ใช้งาน" }, { key: "reports", icon: "📑", label: "รายงาน" }, { key: "settings", icon: "⚙️", label: "ตั้งค่า" }]
-    : [{ key: "cars", icon: "🚗", label: "จองรถ" }, { key: "calendar", icon: "📅", label: "ปฏิทิน" }, { key: "mybookings", icon: "📋", label: "การจองของฉัน" }, { key: "settings", icon: "⚙️", label: "ตั้งค่า" }];
+  const mainMenuItems = isAdmin
+    ? [{ key: "dashboard", icon: "\ud83d\udcca", label: "\u0e41\u0e14\u0e0a\u0e1a\u0e2d\u0e23\u0e4c\u0e14" }, { key: "cars", icon: "\u2795", label: "\u0e08\u0e2d\u0e07\u0e23\u0e16" }, { key: "calendar", icon: "\ud83d\udcc5", label: "\u0e1b\u0e0f\u0e34\u0e17\u0e34\u0e19" }, { key: "mybookings", icon: "\ud83d\udccb", label: "\u0e01\u0e32\u0e23\u0e08\u0e2d\u0e07\u0e02\u0e2d\u0e07\u0e09\u0e31\u0e19" }]
+    : [{ key: "cars", icon: "\ud83d\ude97", label: "\u0e08\u0e2d\u0e07\u0e23\u0e16" }, { key: "calendar", icon: "\ud83d\udcc5", label: "\u0e1b\u0e0f\u0e34\u0e17\u0e34\u0e19" }, { key: "mybookings", icon: "\ud83d\udccb", label: "\u0e01\u0e32\u0e23\u0e08\u0e2d\u0e07\u0e02\u0e2d\u0e07\u0e09\u0e31\u0e19" }];
+  const adminMenuItems = isAdmin
+    ? [{ key: "bookings", icon: "\ud83d\udccb", label: "\u0e04\u0e33\u0e02\u0e2d\u0e08\u0e2d\u0e07" }, { key: "users", icon: "\ud83d\udc65", label: "\u0e1c\u0e39\u0e49\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19" }, { key: "reports", icon: "\ud83d\udcca", label: "\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19" }, { key: "settings", icon: "\u2699\ufe0f", label: "\u0e15\u0e31\u0e49\u0e07\u0e04\u0e48\u0e32" }]
+    : [{ key: "settings", icon: "\u2699\ufe0f", label: "\u0e15\u0e31\u0e49\u0e07\u0e04\u0e48\u0e32" }];
+  const allNavItems = [...mainMenuItems, ...adminMenuItems];
 
   const nav = (p) => { setPage(p); setMobileMenu(false); };
+  const pendingCount = bookings.filter(b => b.status === "pending").length;
+  const handleLogout = () => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); setMobileMenu(false); };
 
   return (
     <div style={{ fontFamily: font, display: "flex", flexDirection: "column", height: "100dvh", background: C.bg, color: C.t1, overflow: "hidden" }}>
-      <Navbar navItems={navItems} page={page} onNav={nav} user={currentUser} bookings={bookings} isAdmin={isAdmin} unread={unread} showPanel={showNotif} toggle={() => setShowNotif(!showNotif)} notifs={myNotifs} markRead={markRead} markAllRead={markAllRead} close={() => setShowNotif(false)} isMobile={isMobile} setMobileMenu={setMobileMenu} mobileMenu={mobileMenu} onLogout={() => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); setMobileMenu(false); }} />
+      {/* Top Navbar */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: isMobile ? "10px 16px" : "0 32px", background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.border}`, height: isMobile ? "auto" : 64, position: "sticky", top: 0, zIndex: 100, flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 36 }}>
+          {isMobile && <button onClick={() => setMobileMenu(true)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 24, color: C.t1 }}>\u2630</button>}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+            <div style={{ width: 38, height: 38, background: "linear-gradient(135deg, #C9B8DB, #A7D1ED)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, boxShadow: "0 4px 16px rgba(201,184,219,0.35)", transition: "transform 0.2s" }}>
+              <img src="/logo.png" alt="logo" style={{ width: 26, height: 26, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.textContent = '\ud83d\ude97'; }} />
+            </div>
+            <span style={{ fontSize: 20, fontWeight: 700, background: "linear-gradient(135deg, #4A3D5C, #3A6B8C)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{isMobile ? "" : "Polyfoam"}</span>
+          </div>
+          {!isMobile && (
+            <nav style={{ display: "flex", gap: 4, alignItems: "center" }}>
+              {allNavItems.map(n => (
+                <button key={n.key} onClick={() => nav(n.key)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 16px", border: "none", borderRadius: 10, background: page === n.key ? "#F4F0F8" : "transparent", color: page === n.key ? "#4A3D5C" : "#8E847A", cursor: "pointer", fontSize: 14, fontWeight: page === n.key ? 600 : 500, fontFamily: font, transition: "all 0.2s", position: "relative" }} onMouseEnter={e => page !== n.key && (e.currentTarget.style.background = "#F4F0F8", e.currentTarget.style.color = "#4A3D5C")} onMouseLeave={e => page !== n.key && (e.currentTarget.style.background = "transparent", e.currentTarget.style.color = "#8E847A")}>
+                  <span style={{ fontSize: 16 }}>{n.icon}</span> {n.label}
+                  {n.key === "bookings" && isAdmin && pendingCount > 0 && <span style={{ position: "absolute", top: 4, right: 4, width: 8, height: 8, background: "linear-gradient(135deg, #F0B0C4, #F5C4AB)", borderRadius: "50%", border: "2px solid white" }} />}
+                </button>
+              ))}
+            </nav>
+          )}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <NotifBell unread={unread} showPanel={showNotif} toggle={() => setShowNotif(!showNotif)} notifs={myNotifs} markRead={markRead} markAllRead={markAllRead} close={() => setShowNotif(false)} isMobile={isMobile} />
+          {!isMobile && (
+            <div onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 14px 6px 6px", borderRadius: 100, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "#C9B8DB"; e.currentTarget.style.background = "#F4F0F8"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = "#fff"; }}>
+              <div style={{ width: 32, height: 32, background: "linear-gradient(135deg, #F5C4AB, #F0B0C4)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>{currentUser.name?.substring(0, 2)}</div>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#4A433C" }}>{currentUser.name}</span>
+              <span style={{ fontSize: 10, color: "#B8AFA6", marginLeft: 2 }}>\u25bc</span>
+            </div>
+          )}
+        </div>
+      </div>
 
+      {/* Main Content */}
       <div style={{ flex: 1, overflowX: "hidden", overflowY: "auto", minWidth: 0 }}>
-        <div style={{ width: "100%", maxWidth: 1100, margin: "0 auto", padding: isMobile ? "24px 16px 80px" : "32px 36px 40px" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: isMobile ? "24px 16px 80px" : "28px 32px 60px" }}>
           {!dataLoaded ? (
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '60vh', color: C.t3, animation: "fadeIn 0.3s" }}>
               <div style={{ width: 40, height: 40, border: `4px solid ${C.border}`, borderTopColor: C.accent, borderRadius: "50%", animation: "spin 1s linear infinite", marginBottom: 16 }} />
-              <div style={{ fontSize: 15, fontWeight: 600 }}>กำลังอัปเดตข้อมูล...</div>
+              <div style={{ fontSize: 15, fontWeight: 600 }}>\u0e01\u0e33\u0e25\u0e31\u0e07\u0e2d\u0e31\u0e1b\u0e40\u0e14\u0e15\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25...</div>
             </div>
           ) : (<>
             {page === "dashboard" && isAdmin && <Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} />}
@@ -468,11 +506,41 @@ export default function App() {
             {page === "settings" && <Settings currentUser={currentUser} onUpdate={handleUpdateUser} onChangePassword={handleChangePassword} m={isMobile} isAdmin={isAdmin} blackouts={blackoutDates} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
           </>)}
         </div>
-        {carFormModal && <CarFormModal initialData={Object.keys(carFormModal).length > 0 ? carFormModal : null} onClose={() => setCarFormModal(null)} onSubmit={handleSaveCar} />}
-        {bookingModal && <BookingModal car={bookingModal} onClose={() => setBookingModal(null)} onSubmit={handleBook} m={isMobile} blackouts={blackoutDates} />}
-        {confirm && <ConfirmDialog {...confirm} onCancel={() => setConfirm(null)} />}
-        {toast && <div style={{ position: "fixed", bottom: isMobile ? 16 : 28, left: isMobile ? 16 : "auto", right: isMobile ? 16 : 28, background: C.t1, color: "#fff", padding: "12px 20px", borderRadius: 12, fontSize: 13, fontWeight: 500, fontFamily: font, boxShadow: "0 8px 30px rgba(0,0,0,0.2)", animation: "slideUp 0.3s", zIndex: 999, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>{toast.icon}</span> {toast.msg}</div>}
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobile && mobileMenu && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 200, animation: "fadeIn 0.15s" }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)" }} onClick={() => setMobileMenu(false)} />
+          <div style={{ position: "relative", width: 280, height: "100%", background: "#fff", display: "flex", flexDirection: "column", animation: "slideRight 0.2s", boxShadow: "0 8px 32px rgba(107,91,123,0.15)" }}>
+            <div style={{ padding: "24px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: 20, fontWeight: 800, background: "linear-gradient(135deg, #4A3D5C, #3A6B8C)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Polyfoam</span>
+              <button onClick={() => setMobileMenu(false)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: C.t3 }}>\u2715</button>
+            </div>
+            <nav style={{ flex: 1, padding: "16px 12px" }}>
+              {allNavItems.map(n => (
+                <button key={n.key} onClick={() => nav(n.key)} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "14px 16px", marginBottom: 4, border: "none", borderRadius: 12, background: page === n.key ? "#F4F0F8" : "transparent", color: page === n.key ? "#4A3D5C" : "#8E847A", cursor: "pointer", fontSize: 15, fontWeight: page === n.key ? 600 : 500, fontFamily: font, transition: "all 0.15s" }}>
+                  <span style={{ fontSize: 20 }}>{n.icon}</span> {n.label}
+                  {n.key === "bookings" && isAdmin && pendingCount > 0 && <span style={{ marginLeft: "auto", background: "#F0B0C4", color: "#fff", fontSize: 12, fontWeight: 800, padding: "2px 8px", borderRadius: 10 }}>{pendingCount}</span>}
+                </button>
+              ))}
+            </nav>
+            <div style={{ padding: "20px", borderTop: `1px solid ${C.border}` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+                <div style={{ width: 36, height: 36, background: "linear-gradient(135deg, #F5C4AB, #F0B0C4)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700 }}>{currentUser.name?.substring(0, 2)}</div>
+                <div><div style={{ fontSize: 16, fontWeight: 700, color: C.t1 }}>{currentUser.name}</div><div style={{ fontSize: 13, color: C.t3 }}>{currentUser.department}</div></div>
+              </div>
+              <button onClick={handleLogout} style={{ width: "100%", padding: "14px", border: `1px solid rgba(239,68,68,0.2)`, borderRadius: 12, background: "#FCF0F3", color: "#9C4462", cursor: "pointer", fontSize: 15, fontFamily: font, fontWeight: 700 }}>\u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e30\u0e1a\u0e1a</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modals & Overlays */}
+      {carFormModal && <CarFormModal initialData={Object.keys(carFormModal).length > 0 ? carFormModal : null} onClose={() => setCarFormModal(null)} onSubmit={handleSaveCar} />}
+      {bookingModal && <BookingModal car={bookingModal} onClose={() => setBookingModal(null)} onSubmit={handleBook} m={isMobile} blackouts={blackoutDates} />}
+      {confirm && <ConfirmDialog {...confirm} onCancel={() => setConfirm(null)} />}
+      {toast && <div style={{ position: "fixed", bottom: isMobile ? 16 : 28, left: isMobile ? 16 : "auto", right: isMobile ? 16 : 28, background: "#332E29", color: "#fff", padding: "12px 20px", borderRadius: 14, fontSize: 13, fontWeight: 500, fontFamily: font, boxShadow: "0 8px 30px rgba(0,0,0,0.15)", animation: "slideUp 0.3s", zIndex: 999, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>{toast.icon}</span> {toast.msg}</div>}
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
@@ -480,103 +548,47 @@ export default function App() {
         @keyframes slideUpFade{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
         @keyframes float{0%{transform:translateY(0px)}50%{transform:translateY(-12px)}100%{transform:translateY(0px)}}
         @keyframes slideRight{from{transform:translateX(-100%)}to{transform:translateX(0)}}
         @keyframes bellShake{0%{transform:rotate(0)}15%{transform:rotate(12deg)}30%{transform:rotate(-10deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(3deg)}100%{transform:rotate(0)}}
         @keyframes panelSlide{from{opacity:0;transform:translateY(-8px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
         @keyframes pulseRing{0%{transform:scale(0.8);opacity:1}100%{transform:scale(2.2);opacity:0}}
-        input:focus,select:focus,textarea:focus{outline:none;border-color:${C.accent}!important;box-shadow:0 0 0 3px ${C.accentLight}}
-        ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+        input:focus,select:focus,textarea:focus{outline:none;border-color:#C9B8DB!important;box-shadow:0 0 0 3px #F4F0F8}
+        ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#E0DAD4;border-radius:3px}
         *{box-sizing:border-box}
       `}</style>
     </div>
   );
 }
 
-// ─── Navbar ──────────────────────────────────────────────────
-function Navbar({ navItems, page, onNav, user, bookings, isAdmin, unread, showPanel, toggle, notifs, markRead, markAllRead, close, isMobile, setMobileMenu, mobileMenu, onLogout }) {
+// \u2500\u2500\u2500 Notification Bell \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
+function NotifBell({ unread, showPanel, toggle, notifs, markRead, markAllRead, close, isMobile }) {
   const ref = useRef(null);
   useEffect(() => { const h = e => { if (ref.current && !ref.current.contains(e.target)) close(); }; if (showPanel) document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h); }, [showPanel, close]);
 
   return (
-    <>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: isMobile ? "10px 16px" : "12px 32px", background: C.card, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 100 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 36 }}>
-          {isMobile ? <button onClick={() => setMobileMenu(true)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 24, padding: "0 6px 0 0", color: C.t1 }}>☰</button> : null}
-          <div style={{ fontSize: 18, fontWeight: 800, display: "flex", alignItems: "center", gap: 10, color: C.t1 }}>
-            <img src="/logo.png" alt="logo" style={{ height: 32, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'inline-block'; }} />
-            <span style={{ fontSize: 24, display: "none" }}>🏢</span> {isMobile ? "" : "Polyfoam"}
-          </div>
-
-          {!isMobile && (
-            <nav style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              {navItems.map(n => (
-                <button key={n.key} onClick={() => onNav(n.key)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", border: "none", borderRadius: 10, background: page === n.key ? C.accentLight : "transparent", color: page === n.key ? C.accent : C.t2, cursor: "pointer", fontSize: 13, fontWeight: page === n.key ? 700 : 600, fontFamily: font, transition: "0.2s" }} onMouseEnter={e => page !== n.key && (e.currentTarget.style.background = "#F9FAFB")} onMouseLeave={e => page !== n.key && (e.currentTarget.style.background = "transparent")}>
-                  <span style={{ fontSize: 16 }}>{n.icon}</span> {n.label}
-                  {n.key === "bookings" && isAdmin && bookings.filter(b => b.status === "pending").length > 0 && <span style={{ marginLeft: 4, background: C.danger, color: "#fff", fontSize: 11, fontWeight: 700, padding: "1px 6px", borderRadius: 10 }}>{bookings.filter(b => b.status === "pending").length}</span>}
-                </button>
-              ))}
-            </nav>
-          )}
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div ref={ref} style={{ position: "relative" }}>
-            <button onClick={toggle} style={{ position: "relative", background: showPanel ? C.accentLight : "#F5F5F7", border: `1px solid ${showPanel ? C.accent + "40" : "transparent"}`, borderRadius: 12, width: 44, height: 44, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, transition: "all 0.2s", animation: unread > 0 && !showPanel ? "bellShake 0.6s" : "none" }}>🔔
-              {unread > 0 && <><span style={{ position: "absolute", top: -4, right: -4, background: C.danger, color: "#fff", fontSize: 10, fontWeight: 800, minWidth: 20, height: 20, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", border: "2px solid #fff" }}>{unread}</span><span style={{ position: "absolute", top: -4, right: -4, width: 20, height: 20, borderRadius: 10, background: C.danger, animation: "pulseRing 1.5s ease-out infinite", opacity: 0.4 }} /></>}
-            </button>
-            {showPanel && (
-              <div style={{ position: "absolute", top: "100%", right: isMobile ? -60 : -10, marginTop: 12, width: 340, maxWidth: "90vw", background: C.card, borderRadius: 16, boxShadow: "0 10px 40px rgba(0,0,0,0.12)", border: `1px solid ${C.border}`, overflow: "hidden", zIndex: 60, animation: "panelSlide 0.2s" }}>
-                <div style={{ padding: "16px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}><div style={{ fontSize: 15, fontWeight: 800, color: C.t1 }}>การแจ้งเตือน</div>{unread > 0 && <button onClick={markAllRead} style={{ fontSize: 11, color: C.accent, background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}>ทำเครื่องหมายทั้งหมด</button>}</div>
-                <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
-                  {notifs.length === 0 ? <div style={{ padding: 40, textAlign: "center", color: C.t3, fontSize: 14, display: "flex", flexDirection: "column", gap: 12, fontWeight: 500 }}><span style={{ fontSize: 36 }}>📭</span>ไม่มีการแจ้งเตือนใหม่</div> :
-                    notifs.map(n => (<div key={n.id} onClick={() => { if (!n.read) markRead(n.id); close(); }} style={{ padding: "14px 16px", borderBottom: `1px solid ${C.border}`, display: "flex", gap: 12, cursor: "pointer", background: n.read ? "transparent" : "#F8FAFC", transition: "0.2s" }} onMouseEnter={e => e.currentTarget.style.background = n.read ? "#F9FAFB" : "#F1F5F9"} onMouseLeave={e => e.currentTarget.style.background = n.read ? "transparent" : "#F8FAFC"}>
-                      <div style={{ fontSize: 22, width: 44, height: 44, borderRadius: 22, background: n.read ? "#F5F5F7" : C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{n.icon}</div>
-                      <div><div style={{ fontSize: 13, fontWeight: n.read ? 600 : 800, color: C.t1, marginBottom: 4 }}>{n.title}</div><div style={{ fontSize: 12, color: C.t2, lineHeight: 1.5 }}>{n.message}</div><div style={{ fontSize: 11, color: C.t3, marginTop: 6, fontWeight: 500 }}>{new Date(n.createdAt).toLocaleString('th-TH')}</div></div>
-                      {!n.read && <div style={{ width: 8, height: 8, borderRadius: 4, background: C.accent, marginTop: 6, flexShrink: 0 }} />}
-                    </div>))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {!isMobile && (
-            <div style={{ display: "flex", alignItems: "center", gap: 12, paddingLeft: 16, borderLeft: `1px solid ${C.border}` }}>
-              <span style={{ fontSize: 28 }}>{user.avatar}</span>
-              <div><div style={{ fontSize: 13, fontWeight: 700, color: C.t1 }}>{user.name}</div><div style={{ fontSize: 11, color: C.t3, fontWeight: 500 }}>{user.department}</div></div>
-              <button onClick={onLogout} style={{ marginLeft: 8, padding: "8px 12px", border: "none", borderRadius: 10, background: "#FEF2F2", color: C.danger, cursor: "pointer", fontSize: 12, fontFamily: font, fontWeight: 700, transition: "0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "#FEE2E2"} onMouseLeave={e => e.currentTarget.style.background = "#FEF2F2"}>ออก</button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {isMobile && mobileMenu && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 200, animation: "fadeIn 0.15s" }}>
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)" }} onClick={() => setMobileMenu(false)} />
-          <div style={{ position: "relative", width: 280, height: "100%", background: C.card, display: "flex", flexDirection: "column", animation: "slideRight 0.2s" }}>
-            <div style={{ padding: "24px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div style={{ fontSize: 20, fontWeight: 800, display: "flex", alignItems: "center", gap: 10, color: C.t1 }}><img src="/logo.png" alt="logo" style={{ height: 32, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; }} /> Polyfoam</div>
-              <button onClick={() => setMobileMenu(false)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: C.t2 }}>✕</button>
-            </div>
-            <nav style={{ flex: 1, padding: "16px 12px" }}>
-              {navItems.map(n => (
-                <button key={n.key} onClick={() => { onNav(n.key); setMobileMenu(false); }} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "14px 16px", marginBottom: 6, border: "none", borderRadius: 12, background: page === n.key ? C.accentLight : "transparent", color: page === n.key ? C.accent : C.t2, cursor: "pointer", fontSize: 15, fontWeight: page === n.key ? 700 : 600, fontFamily: font, transition: "all 0.15s" }}>
-                  <span style={{ fontSize: 20 }}>{n.icon}</span> {n.label}
-                  {n.key === "bookings" && isAdmin && bookings.filter(b => b.status === "pending").length > 0 && <span style={{ marginLeft: "auto", background: C.danger, color: "#fff", fontSize: 12, fontWeight: 800, padding: "2px 8px", borderRadius: 10 }}>{bookings.filter(b => b.status === "pending").length}</span>}
-                </button>
-              ))}
-            </nav>
-            <div style={{ padding: "20px", borderTop: `1px solid ${C.border}`, background: "#F8FAFC" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}><span style={{ fontSize: 36 }}>{user.avatar}</span><div><div style={{ fontSize: 16, fontWeight: 700, color: C.t1 }}>{user.name}</div><div style={{ fontSize: 13, color: C.t3, fontWeight: 500 }}>{user.department}</div></div></div>
-              <button onClick={onLogout} style={{ width: "100%", padding: "14px", border: `1px solid ${C.danger}40`, borderRadius: 12, background: "#FEF2F2", color: C.danger, cursor: "pointer", fontSize: 15, fontFamily: font, fontWeight: 700 }}>ออกจากระบบ</button>
-            </div>
+    <div ref={ref} style={{ position: "relative" }}>
+      <button onClick={toggle} style={{ width: 40, height: 40, borderRadius: 10, border: `1.5px solid ${showPanel ? "#C9B8DB" : C.border}`, background: showPanel ? "#F4F0F8" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, transition: "all 0.2s", position: "relative", animation: unread > 0 && !showPanel ? "bellShake 0.6s" : "none" }}>\ud83d\udd14
+        {unread > 0 && <><span style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, background: "#F0B0C4", borderRadius: "50%", border: "2px solid white" }} /><span style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, borderRadius: "50%", background: "#F0B0C4", animation: "pulseRing 1.5s ease-out infinite", opacity: 0.4 }} /></>}
+      </button>
+      {showPanel && (
+        <div style={{ position: "absolute", top: "100%", right: isMobile ? -60 : -10, marginTop: 12, width: 340, maxWidth: "90vw", background: C.card, borderRadius: 18, boxShadow: "0 8px 32px rgba(107,91,123,0.12)", border: `1px solid ${C.border}`, overflow: "hidden", zIndex: 60, animation: "panelSlide 0.2s" }}>
+          <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}><div style={{ fontSize: 15, fontWeight: 800 }}>\u0e01\u0e32\u0e23\u0e41\u0e08\u0e49\u0e07\u0e40\u0e15\u0e37\u0e2d\u0e19</div>{unread > 0 && <button onClick={markAllRead} style={{ fontSize: 11, color: "#6B5B7B", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}>\u0e17\u0e33\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e2b\u0e21\u0e32\u0e22\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14</button>}</div>
+          <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
+            {notifs.length === 0 ? <div style={{ padding: 40, textAlign: "center", color: C.t3, fontSize: 14, display: "flex", flexDirection: "column", gap: 12, fontWeight: 500 }}><span style={{ fontSize: 36 }}>\ud83d\udced</span>\u0e44\u0e21\u0e48\u0e21\u0e35\u0e01\u0e32\u0e23\u0e41\u0e08\u0e49\u0e07\u0e40\u0e15\u0e37\u0e2d\u0e19\u0e43\u0e2b\u0e21\u0e48</div> :
+              notifs.map(n => (<div key={n.id} onClick={() => { if (!n.read) markRead(n.id); close(); }} style={{ padding: "14px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", gap: 12, cursor: "pointer", background: n.read ? "transparent" : "#F4F0F8", transition: "0.2s" }} onMouseEnter={e => e.currentTarget.style.background = n.read ? "#FAF8F6" : "#E8E0F0"} onMouseLeave={e => e.currentTarget.style.background = n.read ? "transparent" : "#F4F0F8"}>
+                <div style={{ fontSize: 22, width: 44, height: 44, borderRadius: 14, background: n.read ? "#F0ECE8" : "#E8E0F0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{n.icon}</div>
+                <div><div style={{ fontSize: 13, fontWeight: n.read ? 600 : 800, color: C.t1, marginBottom: 4 }}>{n.title}</div><div style={{ fontSize: 12, color: C.t2, lineHeight: 1.5 }}>{n.message}</div><div style={{ fontSize: 11, color: C.t3, marginTop: 6, fontWeight: 500 }}>{new Date(n.createdAt).toLocaleString('th-TH')}</div></div>
+                {!n.read && <div style={{ width: 8, height: 8, borderRadius: 4, background: "#C9B8DB", marginTop: 6, flexShrink: 0 }} />}
+              </div>))}
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
+
 
 
 
@@ -1155,25 +1167,101 @@ function AddUserModal({ onClose, onSubmit, m }) {
 
 // ─── Dashboard ───────────────────────────────────────────────
 function Dashboard({ bookings, cars, users, m }) {
-  const stats = [{ label: "รถทั้งหมด", value: cars.length, icon: "🚗", color: C.t1, bg: "#F5F5F7" }, { label: "รถว่าง", value: cars.filter(c => c.status === "available").length, icon: "✅", color: C.t1, bg: "#F5F5F7" }, { label: "รอดำเนินการ", value: bookings.filter(b => b.status === "pending").length, icon: "⏳", color: C.t1, bg: "#F5F5F7" }, { label: "จองเดือนนี้", value: bookings.filter(b => b.status === "approved" || b.status === "completed").length, icon: "📈", color: C.t1, bg: "#F5F5F7" }];
+  const pastelStats = [
+    { label: "รถทั้งหมด", value: cars.length, icon: "🚗", iconBg: "#F4F0F8", borderGrad: "linear-gradient(90deg, #C9B8DB, #A7D1ED)" },
+    { label: "รถว่างวันนี้", value: cars.filter(c => c.status === "available").length, icon: "✅", iconBg: "#EDF8F3", borderGrad: "linear-gradient(90deg, #A8DCC8, #8BD4B8)" },
+    { label: "รอการอนุมัติ", value: bookings.filter(b => b.status === "pending").length, icon: "⏳", iconBg: "#FEFAEB", borderGrad: "linear-gradient(90deg, #F5E08A, #F5C4AB)" },
+    { label: "จองเดือนนี้", value: bookings.filter(b => b.status === "approved" || b.status === "completed").length, icon: "📊", iconBg: "#FCF0F3", borderGrad: "linear-gradient(90deg, #F0B0C4, #F5C4AB)" },
+  ];
+  const avatarGrads = ["linear-gradient(135deg,#C9B8DB,#A7D1ED)", "linear-gradient(135deg,#A8DCC8,#8BD4B8)", "linear-gradient(135deg,#F5C4AB,#F0B0C4)", "linear-gradient(135deg,#A7D1ED,#C9B8DB)"];
+
   return (
     <div style={{ animation: "fadeIn 0.3s" }}>
-      <div style={{ marginBottom: 24 }}><h1 style={{ fontSize: m ? 20 : 26, fontWeight: 800, margin: 0 }}>แดชบอร์ด</h1><p style={{ color: C.t2, fontSize: 13, margin: "4px 0 0" }}>ภาพรวมระบบจองรถบริษัท</p></div>
-      <div style={{ display: "grid", gridTemplateColumns: m ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: 12, marginBottom: 24 }}>
-        {stats.map((s, i) => (<div key={i} style={{ background: C.card, borderRadius: 12, padding: m ? "16px 12px" : "20px 16px", border: `1px solid ${C.border}` }}><div style={{ display: "flex", justifyContent: "space-between" }}><div><div style={{ fontSize: 11, color: C.t2, marginBottom: 6 }}>{s.label}</div><div style={{ fontSize: 28, fontWeight: 800, color: s.color }}>{s.value}</div></div><div style={{ width: 36, height: 36, borderRadius: 10, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{s.icon}</div></div></div>))}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: m ? "flex-start" : "center", marginBottom: 28, flexWrap: "wrap", gap: 12 }}>
+        <div><h1 style={{ fontSize: m ? 22 : 28, fontWeight: 700, margin: 0, color: "#1F1B18" }}>แดชบอร์ด</h1><p style={{ color: "#8E847A", fontSize: 14, margin: "4px 0 0" }}>ภาพรวมการจองรถวันนี้ · {new Date().toLocaleDateString('th-TH', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p></div>
       </div>
-      <div style={{ background: C.card, borderRadius: 14, padding: m ? 12 : 20, border: `1px solid ${C.border}`, overflow: "hidden" }}>
-        <h3 style={{ fontSize: 14, fontWeight: 700, margin: "0 0 12px" }}>การจองล่าสุด</h3>
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, minWidth: 450 }}>
-            <thead><tr style={{ borderBottom: `2px solid ${C.border}` }}>{["ผู้จอง", "รถ", "วันที่", "สถานะ"].map(h => <th key={h} style={{ textAlign: "left", padding: "8px 10px", color: C.t2, fontWeight: 600, fontSize: 10 }}>{h}</th>)}</tr></thead>
-            <tbody>{bookings.slice(0, 6).map(b => { const u = users.find(x => x.id === b.userId); const car = cars.find(c => c.id === b.carId); return (<tr key={b.id} style={{ borderBottom: `1px solid ${C.border}` }}><td style={{ padding: 10 }}><div style={{ display: "flex", alignItems: "center", gap: 6 }}><span>{u?.avatar}</span><div><div style={{ fontWeight: 600, color: C.t1 }}>{u?.name}</div><div style={{ fontSize: 10, color: C.t3 }}>{u?.department}</div></div></div></td><td style={{ padding: 10 }}>{car?.image} <span style={{ color: C.t1 }}>{car?.name}</span></td><td style={{ padding: 10, color: C.t2, whiteSpace: "nowrap" }}>{b.startDate?.substring(0, 10)}</td><td style={{ padding: 10 }}><Badge status={b.status} /></td></tr>); })}</tbody>
-          </table>
+
+      {/* Stats Row */}
+      <div style={{ display: "grid", gridTemplateColumns: m ? "repeat(2,1fr)" : "repeat(4,1fr)", gap: 18, marginBottom: 28 }}>
+        {pastelStats.map((s, i) => (
+          <div key={i} style={{ background: "#fff", borderRadius: 18, padding: 24, border: `1px solid ${C.border}`, position: "relative", overflow: "hidden", transition: "all 0.25s", cursor: "default" }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(107,91,123,0.08)"; }} onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 4, borderRadius: "4px 4px 0 0", background: s.borderGrad }} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+              <span style={{ fontSize: 13, color: "#8E847A", fontWeight: 500 }}>{s.label}</span>
+              <div style={{ width: 42, height: 42, borderRadius: 14, background: s.iconBg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{s.icon}</div>
+            </div>
+            <div style={{ fontSize: 34, fontWeight: 700, color: "#1F1B18", letterSpacing: "-1px" }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Content Grid: Bookings Table + Car Status */}
+      <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 380px", gap: 22 }}>
+        {/* Today's Bookings */}
+        <div style={{ background: "#fff", borderRadius: 18, border: `1px solid ${C.border}`, overflow: "hidden" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid #F9F7F5" }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#1F1B18" }}>การจองวันนี้</span>
+            <span style={{ fontSize: 13, color: "#6B5B7B", fontWeight: 600, cursor: "pointer" }}>ดูทั้งหมด →</span>
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 500 }}>
+              <thead><tr>
+                {["ผู้จอง", "รถ", "วันที่", "สถานะ"].map(h => <th key={h} style={{ textAlign: "left", padding: "12px 24px", fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1, color: "#B8AFA6", background: "#FDFCFB", borderBottom: `1px solid ${C.border}` }}>{h}</th>)}
+              </tr></thead>
+              <tbody>{bookings.slice(0, 5).map((b, idx) => {
+                const u = users.find(x => x.id === b.userId);
+                const car = cars.find(c => c.id === b.carId);
+                return (
+                  <tr key={b.id} style={{ borderBottom: `1px solid #F9F7F5`, transition: "background 0.15s" }} onMouseEnter={e => e.currentTarget.style.background = "#F4F0F8"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                    <td style={{ padding: "14px 24px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div style={{ width: 34, height: 34, borderRadius: 10, background: avatarGrads[idx % 4], display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>{u?.name?.substring(0, 2)}</div>
+                        <div><div style={{ fontWeight: 600, color: "#332E29" }}>{u?.name}</div><div style={{ fontSize: 12, color: "#B8AFA6" }}>{u?.department}</div></div>
+                      </div>
+                    </td>
+                    <td style={{ padding: "14px 24px" }}><span style={{ fontWeight: 500 }}>{car?.name}</span><br /><span style={{ fontSize: 12, color: "#B8AFA6" }}>{car?.licensePlate}</span></td>
+                    <td style={{ padding: "14px 24px", color: "#6B6158", whiteSpace: "nowrap" }}>{b.startDate?.substring(0, 10)}</td>
+                    <td style={{ padding: "14px 24px" }}><Badge status={b.status} /></td>
+                  </tr>
+                );
+              })}</tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Car Status Panel */}
+        <div style={{ background: "#fff", borderRadius: 18, border: `1px solid ${C.border}`, overflow: "hidden" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "18px 24px", borderBottom: "1px solid #F9F7F5" }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#1F1B18" }}>สถานะรถ</span>
+            <span style={{ fontSize: 13, color: "#6B5B7B", fontWeight: 600, cursor: "pointer" }}>จัดการ →</span>
+          </div>
+          <div style={{ padding: 14 }}>
+            {cars.slice(0, 5).map((car, idx) => {
+              const iconBgs = ["#F4F0F8", "#EDF8F3", "#FEF2EC", "#EBF4FB", "#FCF0F3"];
+              const barColors = ["linear-gradient(90deg, #A8DCC8, #8BD4B8)", "linear-gradient(90deg, #F5E08A, #F5C4AB)", "linear-gradient(90deg, #A7D1ED, #C9B8DB)", "linear-gradient(90deg, #F0B0C4, #E08BA0)", "linear-gradient(90deg, #A8DCC8, #8BD4B8)"];
+              const isAvailable = car.status === "available";
+              return (
+                <div key={car.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: 14, borderRadius: 14, marginBottom: 6, transition: "all 0.2s", cursor: "pointer" }} onMouseEnter={e => e.currentTarget.style.background = "#FAF8F6"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                  <div style={{ width: 50, height: 50, borderRadius: 14, background: iconBgs[idx % 5], display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26 }}>{car.image}</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: "#332E29" }}>{car.name}</div>
+                    <div style={{ fontSize: 12, color: "#B8AFA6", marginTop: 2 }}>{car.licensePlate} · {STATUS_MAP[car.status]?.label || car.status}</div>
+                    <div style={{ width: "100%", height: 5, background: "#F0ECE8", borderRadius: 100, marginTop: 8, overflow: "hidden" }}>
+                      <div style={{ height: "100%", borderRadius: 100, width: isAvailable ? "100%" : car.status === "booked" ? "60%" : "30%", background: barColors[idx % 5], transition: "width 0.8s ease" }} />
+                    </div>
+                  </div>
+                  <Badge status={car.status} />
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+
 
 // ─── Reports ─────────────────────────────────────────────────
 function Reports({ bookings, cars, users, m }) {
