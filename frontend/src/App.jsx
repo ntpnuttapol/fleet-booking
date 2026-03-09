@@ -45,7 +45,7 @@ function useWindowWidth() {
 }
 
 const font = `'Noto Sans Thai', 'DM Sans', system-ui, sans-serif`;
-const C = { bg: "#F4F6FB", card: "#FFFFFF", sidebar: "#FFFFFF", accent: "#6366F1", accentLight: "#E0E7FF", border: "#E2E8F0", t1: "#0F172A", t2: "#475569", t3: "#94A3B8", danger: "#EF4444", success: "#10B981", warn: "#F59E0B" };
+const C = { bg: "#E0E7FF", card: "#EEF2FF", sidebar: "#EEF2FF", accent: "#4F46E5", accentLight: "#C7D2FE", border: "#A5B4FC", t1: "#1E1B4B", t2: "#4338CA", t3: "#818CF8", danger: "#EF4444", success: "#10B981", warn: "#F59E0B" };
 
 // ─── Confirm Dialog ──────────────────────────────────────────
 function ConfirmDialog({ title, message, confirmLabel, confirmColor, onConfirm, onCancel, icon }) {
