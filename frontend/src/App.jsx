@@ -612,16 +612,18 @@ function LoginPage({ form, setForm, error, onLogin, isMobile, isSuccess }) {
         {/* Driving Car Animation */}
         <style>{`
           @keyframes driveAcross {
-            0% { transform: translateX(-150px); }
-            100% { transform: translateX(calc(100vw + 150px)); }
+            0% { transform: translateX(150px); }
+            100% { transform: translateX(calc(-100vw - 150px)); }
           }
           @keyframes wheelsBounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-2px); }
           }
         `}</style>
-        <div style={{ position: "absolute", bottom: isMobile ? "2%" : "5%", left: 0, zIndex: 0, animation: "driveAcross 12s linear infinite", display: "flex", gap: 20, opacity: 0.8, pointerEvents: "none" }}>
-          <div style={{ fontSize: isMobile ? 40 : 56, animation: "wheelsBounce 0.4s ease-in-out infinite", filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.1))" }}>🚗</div>
+        <div style={{ position: "absolute", bottom: isMobile ? "2%" : "5%", right: 0, zIndex: 0, animation: "driveAcross 12s linear infinite", display: "flex", gap: 20, opacity: 0.8, pointerEvents: "none" }}>
+          <div style={{ transform: "scaleX(-1)" }}>
+            <div style={{ fontSize: isMobile ? 40 : 56, animation: "wheelsBounce 0.4s ease-in-out infinite", filter: "drop-shadow(0 10px 10px rgba(0,0,0,0.1))" }}>🚗</div>
+          </div>
         </div>
       </div>
 
