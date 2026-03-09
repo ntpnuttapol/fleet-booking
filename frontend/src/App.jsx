@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 // ─── Constants ───────────────────────────────────────────────
-const API_BASE = "http://localhost:3001";
+const API_BASE = import.meta.env.DEV ? "http://localhost:3001" : "https://fleet-booking-app.onrender.com";
 
 // ─── Helpers ─────────────────────────────────────────────────
 const STATUS_MAP = {
