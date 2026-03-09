@@ -457,10 +457,10 @@ export default function App() {
       {/* Top Navbar */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: isMobile ? "10px 16px" : "0 32px", background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.border}`, height: isMobile ? "auto" : 64, position: "sticky", top: 0, zIndex: 100, flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 36 }}>
-          {isMobile && <button onClick={() => setMobileMenu(true)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 24, color: C.t1 }}>\u2630</button>}
+          {isMobile && <button onClick={() => setMobileMenu(true)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 24, color: C.t1 }}>☰</button>}
           <div style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
             <div style={{ width: 38, height: 38, background: "linear-gradient(135deg, #C9B8DB, #A7D1ED)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, boxShadow: "0 4px 16px rgba(201,184,219,0.35)", transition: "transform 0.2s" }}>
-              <img src="/logo.png" alt="logo" style={{ width: 26, height: 26, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.textContent = '\ud83d\ude97'; }} />
+              <img src="/logo.png" alt="logo" style={{ width: 26, height: 26, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; e.target.parentElement.textContent = '🚗'; }} />
             </div>
             <span style={{ fontSize: 20, fontWeight: 700, background: "linear-gradient(135deg, #4A3D5C, #3A6B8C)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{isMobile ? "" : "Polyfoam"}</span>
           </div>
@@ -481,7 +481,7 @@ export default function App() {
             <div onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 14px 6px 6px", borderRadius: 100, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "#C9B8DB"; e.currentTarget.style.background = "#F4F0F8"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = "#fff"; }}>
               <div style={{ width: 32, height: 32, background: "linear-gradient(135deg, #F5C4AB, #F0B0C4)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>{currentUser.name?.substring(0, 2)}</div>
               <span style={{ fontSize: 13, fontWeight: 600, color: "#4A433C" }}>{currentUser.name}</span>
-              <span style={{ fontSize: 10, color: "#B8AFA6", marginLeft: 2 }}>\u25bc</span>
+              <span style={{ fontSize: 10, color: "#B8AFA6", marginLeft: 2 }}>▼</span>
             </div>
           )}
         </div>
@@ -493,7 +493,7 @@ export default function App() {
           {!dataLoaded ? (
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '60vh', color: C.t3, animation: "fadeIn 0.3s" }}>
               <div style={{ width: 40, height: 40, border: `4px solid ${C.border}`, borderTopColor: C.accent, borderRadius: "50%", animation: "spin 1s linear infinite", marginBottom: 16 }} />
-              <div style={{ fontSize: 15, fontWeight: 600 }}>\u0e01\u0e33\u0e25\u0e31\u0e07\u0e2d\u0e31\u0e1b\u0e40\u0e14\u0e15\u0e02\u0e49\u0e2d\u0e21\u0e39\u0e25...</div>
+              <div style={{ fontSize: 15, fontWeight: 600 }}>กำลังอัปเดตข้อมูล...</div>
             </div>
           ) : (<>
             {page === "dashboard" && isAdmin && <Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} />}
