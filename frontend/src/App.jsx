@@ -435,7 +435,7 @@ export default function App() {
   const nav = (p) => { setPage(p); setMobileMenu(false); };
 
   return (
-    <div style={{ fontFamily: font, display: "flex", height: "100vh", background: C.bg, color: C.t1, overflow: "hidden" }}>
+    <div style={{ fontFamily: font, display: "flex", height: "100dvh", background: C.bg, color: C.t1, overflow: "hidden" }}>
       {!isMobile && <div style={{ width: 220, background: C.sidebar, color: C.t1, display: "flex", flexDirection: "column", flexShrink: 0, borderRight: `1px solid ${C.border}` }}>
         <Sidebar navItems={navItems} page={page} onNav={nav} user={currentUser} bookings={bookings} isAdmin={isAdmin} onLogout={() => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); }} />
       </div>}
@@ -543,7 +543,7 @@ function TopBar({ unread, showPanel, toggle, notifs, markRead, markAllRead, clos
 // ─── Login ───────────────────────────────────────────────────
 function LoginPage({ form, setForm, error, onLogin, isMobile }) {
   return (
-    <div style={{ fontFamily: font, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F5F5F7", padding: 16 }}>
+    <div style={{ fontFamily: font, minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F5F5F7", padding: 16 }}>
       <div style={{ width: "100%", maxWidth: 380, padding: isMobile ? "36px 24px" : "44px 36px", background: "#FFFFFF", border: `1px solid ${C.border}`, borderRadius: 24, boxShadow: "0 10px 40px rgba(0,0,0,0.04)", animation: "scaleIn 0.4s" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}><img src="/logo.png" alt="logo" style={{ height: 60, objectFit: "contain", marginBottom: 12 }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} /><div style={{ fontSize: 44, marginBottom: 10, display: "none" }}>🏢</div><div style={{ fontSize: 24, fontWeight: 800, color: C.t1 }}>Polyfoam</div><div style={{ fontSize: 13, color: C.t2, marginTop: 5, fontWeight: 500 }}>ระบบจองรถบริษัท</div></div>
         {error && <div style={{ background: "rgba(255,59,48,0.1)", border: "1px solid rgba(255,59,48,0.2)", borderRadius: 12, padding: "10px 14px", marginBottom: 16, color: C.danger, fontSize: 13, fontWeight: 500 }}>{error}</div>}
