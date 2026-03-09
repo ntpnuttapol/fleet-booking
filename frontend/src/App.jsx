@@ -1018,7 +1018,7 @@ function BookingModal({ car, onClose, onSubmit, blackouts, m }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>จองรถ</h2><button onClick={onClose} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: C.t3 }}>✕</button></div>
         <div style={{ display: "flex", alignItems: "center", gap: 14, padding: 14, background: "#F5F5F7", borderRadius: 10, marginBottom: 20, border: `1px solid ${C.border}` }}><span style={{ fontSize: 36 }}>{car.image}</span><div><div style={{ fontWeight: 700, fontSize: 15, color: C.t1 }}>{car.name}</div><div style={{ fontSize: 11, color: C.t2, marginTop: 2 }}>🔖 {car.licensePlate} · 🏷️ {car.type}</div></div></div>
 
-        <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "1fr 1fr", gap: 10, marginBottom: 14 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16, marginBottom: 16 }}>
           <div>
             <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วันที่เริ่ม <span style={{ color: C.danger }}>*</span></label>
             <div style={{ display: "flex", gap: 6 }}>
