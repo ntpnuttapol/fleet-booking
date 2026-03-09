@@ -450,6 +450,7 @@ export default function App() {
           {page === "reports" && isAdmin && <Reports bookings={bookings} cars={cars} users={users} m={isMobile} />}
           {page === "settings" && <Settings currentUser={currentUser} onUpdate={handleUpdateUser} onChangePassword={handleChangePassword} m={isMobile} isAdmin={isAdmin} blackouts={blackoutDates} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
         </div>
+        {addCarModal && <AddCarModal onClose={() => setAddCarModal(false)} onSubmit={handleCreateCar} />}
         {bookingModal && <BookingModal car={bookingModal} onClose={() => setBookingModal(null)} onSubmit={handleBook} m={isMobile} blackouts={blackoutDates} />}
         {confirm && <ConfirmDialog {...confirm} onCancel={() => setConfirm(null)} />}
         {toast && <div style={{ position: "fixed", bottom: isMobile ? 16 : 28, left: isMobile ? 16 : "auto", right: isMobile ? 16 : 28, background: C.t1, color: "#fff", padding: "12px 20px", borderRadius: 12, fontSize: 13, fontWeight: 500, fontFamily: font, boxShadow: "0 8px 30px rgba(0,0,0,0.2)", animation: "slideUp 0.3s", zIndex: 999, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>{toast.icon}</span> {toast.msg}</div>}
