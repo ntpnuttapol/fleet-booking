@@ -436,22 +436,11 @@ export default function App() {
   const nav = (p) => { setPage(p); setMobileMenu(false); };
 
   return (
-    <div style={{ fontFamily: font, display: "flex", height: "100dvh", background: C.bg, color: C.t1, overflow: "hidden" }}>
-      {!isMobile && <div style={{ width: 220, background: C.sidebar, color: C.t1, display: "flex", flexDirection: "column", flexShrink: 0, borderRight: `1px solid ${C.border}` }}>
-        <Sidebar navItems={navItems} page={page} onNav={nav} user={currentUser} bookings={bookings} isAdmin={isAdmin} onLogout={() => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); }} />
-      </div>}
-
-      {isMobile && mobileMenu && <div style={{ position: "fixed", inset: 0, zIndex: 200, animation: "fadeIn 0.15s" }}>
-        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)" }} onClick={() => setMobileMenu(false)} />
-        <div style={{ position: "relative", width: 260, height: "100%", background: C.sidebar, color: C.t1, animation: "slideRight 0.2s", display: "flex", flexDirection: "column" }}>
-          <Sidebar navItems={navItems} page={page} onNav={nav} user={currentUser} bookings={bookings} isAdmin={isAdmin} onLogout={() => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setMobileMenu(false); }} />
-        </div>
-      </div>}
+    <div style={{ fontFamily: font, display: "flex", flexDirection: "column", height: "100dvh", background: C.bg, color: C.t1, overflow: "hidden" }}>
+      <Navbar navItems={navItems} page={page} onNav={nav} user={currentUser} bookings={bookings} isAdmin={isAdmin} unread={unread} showPanel={showNotif} toggle={() => setShowNotif(!showNotif)} notifs={myNotifs} markRead={markRead} markAllRead={markAllRead} close={() => setShowNotif(false)} isMobile={isMobile} setMobileMenu={setMobileMenu} mobileMenu={mobileMenu} onLogout={() => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); setMobileMenu(false); }} />
 
       <div style={{ flex: 1, overflowX: "hidden", overflowY: "auto", minWidth: 0 }}>
-        <TopBar unread={unread} showPanel={showNotif} toggle={() => setShowNotif(!showNotif)} notifs={myNotifs} markRead={markRead} markAllRead={markAllRead} close={() => setShowNotif(false)} isMobile={isMobile} openMenu={() => setMobileMenu(true)}
-          onNavigate={n => { if (isAdmin && n.type === "new_booking") setPage("bookings"); else setPage("mybookings"); markRead(n.id); setShowNotif(false); }} />
-        <div style={{ width: "100%", maxWidth: 1100, margin: "0 auto", padding: isMobile ? "12px 16px 80px" : "12px 36px 32px" }}>
+        <div style={{ width: "100%", maxWidth: 1100, margin: "0 auto", padding: isMobile ? "24px 16px 80px" : "32px 36px 40px" }}>
           {page === "dashboard" && isAdmin && <Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} />}
           {page === "calendar" && <Calendar bookings={bookings} cars={cars} users={users} m={isMobile} blackouts={blackoutDates} isAdmin={isAdmin} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
           {page === "cars" && <Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setCarFormModal({})} onEditCarClick={c => setCarFormModal(c)} />}
@@ -484,62 +473,91 @@ export default function App() {
   );
 }
 
-// ─── Sidebar ─────────────────────────────────────────────────
-function Sidebar({ navItems, page, onNav, user, bookings, isAdmin, onLogout }) {
-  return (<>
-    <div style={{ padding: "24px 20px 16px", borderBottom: `1px solid ${C.border}` }}>
-      <div style={{ fontSize: 18, fontWeight: 800, display: "flex", alignItems: "center", gap: 10, color: C.t1 }}><img src="/logo.png" alt="logo" style={{ height: 26, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'inline-block'; }} /><span style={{ fontSize: 22, display: "none" }}>🏢</span> Polyfoam</div>
-      <div style={{ fontSize: 10, color: C.t3, marginTop: 3, letterSpacing: 1, textTransform: "uppercase" }}>ระบบจองรถบริษัท</div>
-    </div>
-    <nav style={{ flex: 1, padding: "12px 10px" }}>
-      {navItems.map(n => (
-        <button key={n.key} onClick={() => onNav(n.key)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 14px", marginBottom: 3, border: "none", borderRadius: 9, background: page === n.key ? "#F5F5F7" : "transparent", color: page === n.key ? C.accent : C.t2, cursor: "pointer", fontSize: 13, fontWeight: page === n.key ? 600 : 500, fontFamily: font, transition: "all 0.15s" }} onMouseEnter={e => page !== n.key && (e.currentTarget.style.background = "#F9FAFB")} onMouseLeave={e => page !== n.key && (e.currentTarget.style.background = "transparent")}>
-          <span style={{ fontSize: 16 }}>{n.icon}</span> {n.label}
-          {n.key === "bookings" && isAdmin && bookings.filter(b => b.status === "pending").length > 0 && <span style={{ marginLeft: "auto", background: C.danger, color: "#fff", fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 10 }}>{bookings.filter(b => b.status === "pending").length}</span>}
-        </button>
-      ))}
-    </nav>
-    <div style={{ padding: "12px 10px", borderTop: `1px solid ${C.border}` }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 10px" }}><span style={{ fontSize: 24 }}>{user.avatar}</span><div><div style={{ fontSize: 12, fontWeight: 600, color: C.t1 }}>{user.name}</div><div style={{ fontSize: 10, color: C.t3 }}>{user.department}</div></div></div>
-      <button onClick={onLogout} style={{ width: "100%", marginTop: 8, padding: "7px", border: `1px solid ${C.border}`, borderRadius: 8, background: "transparent", color: C.danger, cursor: "pointer", fontSize: 11, fontFamily: font, fontWeight: 600, transition: "0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "#FEF2F2"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>ออกจากระบบ</button>
-    </div>
-  </>);
-}
-
-// ─── TopBar ──────────────────────────────────────────────────
-function TopBar({ unread, showPanel, toggle, notifs, markRead, markAllRead, close, onNavigate, isMobile, openMenu }) {
+// ─── Navbar ──────────────────────────────────────────────────
+function Navbar({ navItems, page, onNav, user, bookings, isAdmin, unread, showPanel, toggle, notifs, markRead, markAllRead, close, isMobile, setMobileMenu, mobileMenu, onLogout }) {
   const ref = useRef(null);
   useEffect(() => { const h = e => { if (ref.current && !ref.current.contains(e.target)) close(); }; if (showPanel) document.addEventListener("mousedown", h); return () => document.removeEventListener("mousedown", h); }, [showPanel, close]);
+
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: isMobile ? "12px 16px 0" : "14px 36px 0", position: "sticky", top: 0, zIndex: 50 }}>
-      {isMobile ? <button onClick={openMenu} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 10, width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>☰</button> : <div />}
-      <div ref={ref} style={{ position: "relative" }}>
-        <button onClick={toggle} style={{ position: "relative", background: showPanel ? C.accentLight : C.card, border: `1px solid ${showPanel ? C.accent + "40" : C.border}`, borderRadius: 10, width: 40, height: 40, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, transition: "all 0.2s", animation: unread > 0 && !showPanel ? "bellShake 0.6s" : "none" }}>🔔
-          {unread > 0 && <><span style={{ position: "absolute", top: -4, right: -4, background: C.danger, color: "#fff", fontSize: 9, fontWeight: 800, minWidth: 18, height: 18, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", border: "2px solid #fff" }}>{unread}</span><span style={{ position: "absolute", top: -4, right: -4, width: 18, height: 18, borderRadius: 9, background: C.danger, animation: "pulseRing 1.5s ease-out infinite", opacity: 0.4 }} /></>}
-        </button>
-        {showPanel && (
-          <div style={{ position: "absolute", top: 48, right: 0, width: isMobile ? "calc(100vw - 32px)" : 380, maxHeight: 480, background: C.card, borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: "0 20px 60px rgba(0,0,0,0.12)", animation: "panelSlide 0.2s", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px 10px", borderBottom: `1px solid ${C.border}` }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 14, fontWeight: 800 }}>การแจ้งเตือน</span>{unread > 0 && <span style={{ background: C.accentLight, color: C.accent, fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 10 }}>{unread} ใหม่</span>}</div>
-              {unread > 0 && <button onClick={markAllRead} style={{ background: "none", border: "none", color: C.accent, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font }}>อ่านทั้งหมด</button>}
+    <>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: isMobile ? "10px 16px" : "12px 32px", background: C.card, borderBottom: `1px solid ${C.border}`, position: "sticky", top: 0, zIndex: 100 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 36 }}>
+          {isMobile ? <button onClick={() => setMobileMenu(true)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 24, padding: "0 6px 0 0", color: C.t1 }}>☰</button> : null}
+          <div style={{ fontSize: 18, fontWeight: 800, display: "flex", alignItems: "center", gap: 10, color: C.t1 }}>
+            <img src="/logo.png" alt="logo" style={{ height: 32, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'inline-block'; }} />
+            <span style={{ fontSize: 24, display: "none" }}>🏢</span> {isMobile ? "" : "Polyfoam"}
+          </div>
+
+          {!isMobile && (
+            <nav style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              {navItems.map(n => (
+                <button key={n.key} onClick={() => onNav(n.key)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "8px 14px", border: "none", borderRadius: 10, background: page === n.key ? C.accentLight : "transparent", color: page === n.key ? C.accent : C.t2, cursor: "pointer", fontSize: 13, fontWeight: page === n.key ? 700 : 600, fontFamily: font, transition: "0.2s" }} onMouseEnter={e => page !== n.key && (e.currentTarget.style.background = "#F9FAFB")} onMouseLeave={e => page !== n.key && (e.currentTarget.style.background = "transparent")}>
+                  <span style={{ fontSize: 16 }}>{n.icon}</span> {n.label}
+                  {n.key === "bookings" && isAdmin && bookings.filter(b => b.status === "pending").length > 0 && <span style={{ marginLeft: 4, background: C.danger, color: "#fff", fontSize: 11, fontWeight: 700, padding: "1px 6px", borderRadius: 10 }}>{bookings.filter(b => b.status === "pending").length}</span>}
+                </button>
+              ))}
+            </nav>
+          )}
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div ref={ref} style={{ position: "relative" }}>
+            <button onClick={toggle} style={{ position: "relative", background: showPanel ? C.accentLight : "#F5F5F7", border: `1px solid ${showPanel ? C.accent + "40" : "transparent"}`, borderRadius: 12, width: 44, height: 44, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, transition: "all 0.2s", animation: unread > 0 && !showPanel ? "bellShake 0.6s" : "none" }}>🔔
+              {unread > 0 && <><span style={{ position: "absolute", top: -4, right: -4, background: C.danger, color: "#fff", fontSize: 10, fontWeight: 800, minWidth: 20, height: 20, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", padding: "0 4px", border: "2px solid #fff" }}>{unread}</span><span style={{ position: "absolute", top: -4, right: -4, width: 20, height: 20, borderRadius: 10, background: C.danger, animation: "pulseRing 1.5s ease-out infinite", opacity: 0.4 }} /></>}
+            </button>
+            {showPanel && (
+              <div style={{ position: "absolute", top: "100%", right: isMobile ? -60 : -10, marginTop: 12, width: 340, maxWidth: "90vw", background: C.card, borderRadius: 16, boxShadow: "0 10px 40px rgba(0,0,0,0.12)", border: `1px solid ${C.border}`, overflow: "hidden", zIndex: 60, animation: "panelSlide 0.2s" }}>
+                <div style={{ padding: "16px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}><div style={{ fontSize: 15, fontWeight: 800, color: C.t1 }}>การแจ้งเตือน</div>{unread > 0 && <button onClick={markAllRead} style={{ fontSize: 11, color: C.accent, background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}>ทำเครื่องหมายทั้งหมด</button>}</div>
+                <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
+                  {notifs.length === 0 ? <div style={{ padding: 40, textAlign: "center", color: C.t3, fontSize: 14, display: "flex", flexDirection: "column", gap: 12, fontWeight: 500 }}><span style={{ fontSize: 36 }}>📭</span>ไม่มีการแจ้งเตือนใหม่</div> :
+                    notifs.map(n => (<div key={n.id} onClick={() => { if (!n.read) markRead(n.id); close(); }} style={{ padding: "14px 16px", borderBottom: `1px solid ${C.border}`, display: "flex", gap: 12, cursor: "pointer", background: n.read ? "transparent" : "#F8FAFC", transition: "0.2s" }} onMouseEnter={e => e.currentTarget.style.background = n.read ? "#F9FAFB" : "#F1F5F9"} onMouseLeave={e => e.currentTarget.style.background = n.read ? "transparent" : "#F8FAFC"}>
+                      <div style={{ fontSize: 22, width: 44, height: 44, borderRadius: 22, background: n.read ? "#F5F5F7" : C.accentLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{n.icon}</div>
+                      <div><div style={{ fontSize: 13, fontWeight: n.read ? 600 : 800, color: C.t1, marginBottom: 4 }}>{n.title}</div><div style={{ fontSize: 12, color: C.t2, lineHeight: 1.5 }}>{n.message}</div><div style={{ fontSize: 11, color: C.t3, marginTop: 6, fontWeight: 500 }}>{new Date(n.createdAt).toLocaleString('th-TH')}</div></div>
+                      {!n.read && <div style={{ width: 8, height: 8, borderRadius: 4, background: C.accent, marginTop: 6, flexShrink: 0 }} />}
+                    </div>))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {!isMobile && (
+            <div style={{ display: "flex", alignItems: "center", gap: 12, paddingLeft: 16, borderLeft: `1px solid ${C.border}` }}>
+              <span style={{ fontSize: 28 }}>{user.avatar}</span>
+              <div><div style={{ fontSize: 13, fontWeight: 700, color: C.t1 }}>{user.name}</div><div style={{ fontSize: 11, color: C.t3, fontWeight: 500 }}>{user.department}</div></div>
+              <button onClick={onLogout} style={{ marginLeft: 8, padding: "8px 12px", border: "none", borderRadius: 10, background: "#FEF2F2", color: C.danger, cursor: "pointer", fontSize: 12, fontFamily: font, fontWeight: 700, transition: "0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "#FEE2E2"} onMouseLeave={e => e.currentTarget.style.background = "#FEF2F2"}>ออก</button>
             </div>
-            <div style={{ overflow: "auto", flex: 1 }}>
-              {notifs.length === 0 ? <div style={{ textAlign: "center", padding: 40, color: C.t3 }}><div style={{ fontSize: 32 }}>📭</div><div style={{ fontSize: 12, marginTop: 6 }}>ไม่มีการแจ้งเตือน</div></div>
-                : notifs.map((n, i) => (
-                  <div key={n.id} onClick={() => onNavigate(n)} style={{ display: "flex", gap: 12, padding: "12px 16px", cursor: "pointer", background: n.read ? "transparent" : `${C.accent}05`, borderBottom: `1px solid ${C.border}`, borderLeft: n.read ? "3px solid transparent" : `3px solid ${C.accent}`, animation: `fadeIn 0.2s ease ${i * 0.03}s both` }}
-                    onMouseEnter={e => e.currentTarget.style.background = "#F8FAFC"} onMouseLeave={e => e.currentTarget.style.background = n.read ? "transparent" : `${C.accent}05`}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, flexShrink: 0, background: n.type?.includes("approved") ? "#D1FAE5" : n.type?.includes("cancel") ? "#F3F4F6" : n.type?.includes("reject") ? "#FEE2E2" : "#FEF3C7", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>{n.icon}</div>
-                    <div style={{ flex: 1, minWidth: 0 }}><div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}><span style={{ fontSize: 12, fontWeight: n.read ? 500 : 700 }}>{n.title}</span><span style={{ fontSize: 10, color: C.t3, flexShrink: 0, marginLeft: 6 }}>{timeAgo(n.createdAt)}</span></div><div style={{ fontSize: 11, color: C.t2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.message}</div></div>
-                    {!n.read && <div style={{ width: 7, height: 7, borderRadius: "50%", background: C.accent, flexShrink: 0, marginTop: 5 }} />}
-                  </div>
-                ))}
+          )}
+        </div>
+      </div>
+
+      {isMobile && mobileMenu && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 200, animation: "fadeIn 0.15s" }}>
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)" }} onClick={() => setMobileMenu(false)} />
+          <div style={{ position: "relative", width: 280, height: "100%", background: C.card, display: "flex", flexDirection: "column", animation: "slideRight 0.2s" }}>
+            <div style={{ padding: "24px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ fontSize: 20, fontWeight: 800, display: "flex", alignItems: "center", gap: 10, color: C.t1 }}><img src="/logo.png" alt="logo" style={{ height: 32, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; }} /> Polyfoam</div>
+              <button onClick={() => setMobileMenu(false)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: C.t2 }}>✕</button>
+            </div>
+            <nav style={{ flex: 1, padding: "16px 12px" }}>
+              {navItems.map(n => (
+                <button key={n.key} onClick={() => { onNav(n.key); setMobileMenu(false); }} style={{ display: "flex", alignItems: "center", gap: 12, width: "100%", padding: "14px 16px", marginBottom: 6, border: "none", borderRadius: 12, background: page === n.key ? C.accentLight : "transparent", color: page === n.key ? C.accent : C.t2, cursor: "pointer", fontSize: 15, fontWeight: page === n.key ? 700 : 600, fontFamily: font, transition: "all 0.15s" }}>
+                  <span style={{ fontSize: 20 }}>{n.icon}</span> {n.label}
+                  {n.key === "bookings" && isAdmin && bookings.filter(b => b.status === "pending").length > 0 && <span style={{ marginLeft: "auto", background: C.danger, color: "#fff", fontSize: 12, fontWeight: 800, padding: "2px 8px", borderRadius: 10 }}>{bookings.filter(b => b.status === "pending").length}</span>}
+                </button>
+              ))}
+            </nav>
+            <div style={{ padding: "20px", borderTop: `1px solid ${C.border}`, background: "#F8FAFC" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}><span style={{ fontSize: 36 }}>{user.avatar}</span><div><div style={{ fontSize: 16, fontWeight: 700, color: C.t1 }}>{user.name}</div><div style={{ fontSize: 13, color: C.t3, fontWeight: 500 }}>{user.department}</div></div></div>
+              <button onClick={onLogout} style={{ width: "100%", padding: "14px", border: `1px solid ${C.danger}40`, borderRadius: 12, background: "#FEF2F2", color: C.danger, cursor: "pointer", fontSize: 15, fontFamily: font, fontWeight: 700 }}>ออกจากระบบ</button>
             </div>
           </div>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }
+
+
 
 // ─── Login ───────────────────────────────────────────────────
 function LoginPage({ form, setForm, error, onLogin, isMobile }) {
