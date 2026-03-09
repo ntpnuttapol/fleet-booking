@@ -45,7 +45,7 @@ function useWindowWidth() {
 }
 
 const font = `'Noto Sans Thai', 'DM Sans', system-ui, sans-serif`;
-const C = { bg: "#E0E7FF", card: "#EEF2FF", sidebar: "#EEF2FF", accent: "#4F46E5", accentLight: "#C7D2FE", border: "#A5B4FC", t1: "#1E1B4B", t2: "#4338CA", t3: "#818CF8", danger: "#EF4444", success: "#10B981", warn: "#F59E0B" };
+const C = { bg: "#F4FAFA", card: "#FFFFFF", sidebar: "#FFFFFF", accent: "#00B49F", accentLight: "#CCF0EC", border: "#E2ECEB", t1: "#1F2937", t2: "#4B5563", t3: "#9CA3AF", danger: "#EF4444", success: "#10B981", warn: "#F59E0B" };
 
 // ─── Confirm Dialog ──────────────────────────────────────────
 function ConfirmDialog({ title, message, confirmLabel, confirmColor, onConfirm, onCancel, icon }) {
@@ -544,9 +544,9 @@ function TopBar({ unread, showPanel, toggle, notifs, markRead, markAllRead, clos
 // ─── Login ───────────────────────────────────────────────────
 function LoginPage({ form, setForm, error, onLogin, isMobile }) {
   return (
-    <div style={{ fontFamily: font, minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F5F5F7", padding: 16 }}>
-      <div style={{ width: "100%", maxWidth: 380, padding: isMobile ? "36px 24px" : "44px 36px", background: "#FFFFFF", border: `1px solid ${C.border}`, borderRadius: 24, boxShadow: "0 10px 40px rgba(0,0,0,0.04)", animation: "scaleIn 0.4s" }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}><img src="/logo.png" alt="logo" style={{ height: 60, objectFit: "contain", marginBottom: 12 }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} /><div style={{ fontSize: 44, marginBottom: 10, display: "none" }}>🏢</div><div style={{ fontSize: 24, fontWeight: 800, color: C.t1 }}>Polyfoam</div><div style={{ fontSize: 13, color: C.t2, marginTop: 5, fontWeight: 500 }}>ระบบจองรถบริษัท</div></div>
+    <div style={{ fontFamily: font, minHeight: "100dvh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg, #E6F7F5 0%, #FFFFFF 100%)", padding: 16 }}>
+      <div style={{ width: "100%", maxWidth: 380, padding: isMobile ? "36px 24px" : "44px 36px", background: "#FFFFFF", border: `1px solid ${C.border}`, borderRadius: 24, boxShadow: "0 20px 50px rgba(0,180,159,0.08)", animation: "scaleIn 0.4s" }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}><img src="/logo.png" alt="logo" style={{ height: 60, objectFit: "contain", marginBottom: 12 }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} /><div style={{ fontSize: 44, marginBottom: 10, display: "none" }}>🏢</div><div style={{ fontSize: 26, fontWeight: 800, color: C.accent, letterSpacing: "-0.5px" }}>Polyfoam</div><div style={{ fontSize: 13, color: C.t2, marginTop: 5, fontWeight: 500 }}>ระบบจองรถบริษัท</div></div>
         {error && <div style={{ background: "rgba(255,59,48,0.1)", border: "1px solid rgba(255,59,48,0.2)", borderRadius: 12, padding: "10px 14px", marginBottom: 16, color: C.danger, fontSize: 13, fontWeight: 500 }}>{error}</div>}
         <div style={{ marginBottom: 14 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล หรือ ชื่อผู้ใช้งาน</label><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com หรือ somchai_admin" style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
         <div style={{ marginBottom: 24 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>รหัสผ่าน</label><input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••" onKeyDown={e => e.key === "Enter" && onLogin()} style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
