@@ -54,4 +54,44 @@ const getMe = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, login, getMe };
+const createUser = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: "ไม่มีสิทธิ์ใช้งานส่วนนี้ (เฉพาะ Admin เท่านั้น)" });
+        }
+
+        const { name, email, password, department, role } = req.body;
+
+        if (!name || !email || !password) {
+            return res.status(400).json({ error: "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน" });
+        }
+
+        const existingUser = await prisma.user.findUnique({
+            where: { email }
+        });
+
+        if (existingUser) {
+            return res.status(400).json({ error: "อีเมลนี้ถูกใช้งานแล้ว" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword,
+                department,
+                role: role || 'user',
+                avatar: "👤" // Default avatar
+            },
+            select: { id: true, name: true, email: true, department: true, role: true, avatar: true }
+        });
+
+        res.status(201).json(newUser);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { getUsers, login, getMe, createUser };

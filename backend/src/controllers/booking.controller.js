@@ -20,7 +20,25 @@ const getBookings = async (req, res) => {
 const createBooking = async (req, res) => {
     try {
         const { carId, startDate, endDate, purpose } = req.body;
+
+        if (!carId) {
+            return res.status(400).json({ error: "กรุณาเลือกรถที่ต้องการจอง" });
+        }
+
         const userId = req.user.id;
+
+        // Limiting 1 booking per user (admins bypassed)
+        if (req.user.role !== 'admin') {
+            const activeBooking = await prisma.booking.findFirst({
+                where: {
+                    userId,
+                    status: { in: ['pending', 'approved'] }
+                }
+            });
+            if (activeBooking) {
+                return res.status(400).json({ error: "คุณมีการจองที่กำลังใช้งานหรือรออนุมัติอยู่แล้ว (จำกัด 1 คัน/คน)" });
+            }
+        }
 
         const booking = await prisma.booking.create({
             data: { carId, userId, startDate, endDate, purpose, status: 'pending' },
@@ -30,17 +48,19 @@ const createBooking = async (req, res) => {
         // Trigger Notification to Admins
         const admins = await prisma.user.findMany({ where: { role: 'admin' } });
         for (const admin of admins) {
-            await notificationService.dispatchNotification({
+            await notificationService.dispatch({
                 userId: admin.id,
                 type: 'new_booking',
-                title: 'คำขอจองใหม่',
-                message: `${booking.user.name} ขอจอง ${booking.car.name} วันที่ ${booking.startDate.replace('T', ' ')}`,
-                bookingId: booking.id
+                data: {
+                    requesterName: booking.user.name,
+                    bookingId: booking.id
+                }
             });
         }
 
         res.status(201).json(booking);
     } catch (error) {
+        console.error("Booking Creation Error:", error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -57,17 +77,12 @@ const updateBookingStatus = async (req, res) => {
         });
 
         // Trigger Notification to User
-        const title = status === 'approved' ? 'การจองได้รับอนุมัติ' : 'การจองถูกปฏิเสธ';
-        const message = status === 'approved'
-            ? `คำขอจอง ${booking.car.name} ได้รับอนุมัติแล้ว`
-            : `คำขอจอง ${booking.car.name} ถูกปฏิเสธ`;
-
-        await notificationService.dispatchNotification({
+        await notificationService.dispatch({
             userId: booking.userId,
             type: status === 'approved' ? 'booking_approved' : 'booking_rejected',
-            title,
-            message,
-            bookingId: booking.id
+            data: {
+                bookingId: booking.id
+            }
         });
 
         res.json(booking);
