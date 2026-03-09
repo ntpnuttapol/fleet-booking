@@ -308,7 +308,7 @@ export default function App() {
     if (blocked) { showToast(`ไม่สามารถจองได้ — ${blocked.reason}`, "🚫"); setBookingModal(null); return; }
 
     const token = localStorage.getItem('fleetbook_token');
-    fetch(`${API_BASE}/api/bookings`, {
+    return fetch(`${API_BASE}/api/bookings`, {
       method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
       body: JSON.stringify({ carId, startDate: data.startDate, endDate: data.endDate, purpose: data.purpose })
     })
@@ -896,7 +896,19 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
 // ─── Booking Modal ───────────────────────────────────────────
 function BookingModal({ car, onClose, onSubmit, m, blackouts }) {
   const [f, setF] = useState({ startDate: "", endDate: "", purpose: "" });
+  const [loading, setLoading] = useState(false);
   const blocked = f.startDate && f.endDate ? blackouts.find(bd => { const d = new Date(bd.date); return d >= new Date(f.startDate) && d <= new Date(f.endDate); }) : null;
+
+  const handleSubmit = async () => {
+    if (f.startDate && f.endDate && f.purpose && !blocked) {
+      setLoading(true);
+      try {
+        await onSubmit(car.id, f);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: m ? "flex-end" : "center", justifyContent: "center", zIndex: 100, animation: "fadeIn 0.2s", backdropFilter: "blur(4px)" }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: m ? "18px 18px 0 0" : 18, padding: m ? "28px 20px 32px" : "28px 32px", width: m ? "100%" : 420, maxHeight: "90vh", overflow: "auto", animation: m ? "slideUp 0.25s" : "scaleIn 0.25s", boxShadow: "0 25px 60px rgba(0,0,0,0.2)" }}>
@@ -909,8 +921,8 @@ function BookingModal({ car, onClose, onSubmit, m, blackouts }) {
         {blocked && <div style={{ padding: "8px 12px", borderRadius: 8, background: "#FEF2F2", border: "1px solid #FECACA", marginBottom: 14, fontSize: 12, color: "#991B1B" }}>🚧 ช่วงวันที่เลือกตรงกับวันห้ามจอง: {blocked.date} — {blocked.reason}</div>}
         <div style={{ marginBottom: 20 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วัตถุประสงค์</label><textarea value={f.purpose} onChange={e => setF({ ...f, purpose: e.target.value })} rows={3} placeholder="เช่น พบลูกค้า, ขนส่งสินค้า..." style={{ width: "100%", padding: "9px 12px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, resize: "vertical", background: "#F5F5F7", color: C.t1 }} /></div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 9, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
-          <button onClick={() => { if (f.startDate && f.endDate && f.purpose && !blocked) onSubmit(car.id, f); }} disabled={!f.startDate || !f.endDate || !f.purpose || !!blocked} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, fontFamily: font, background: f.startDate && f.endDate && f.purpose && !blocked ? C.t1 : "#E5E5EA", color: f.startDate && f.endDate && f.purpose && !blocked ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.startDate && f.endDate && f.purpose && !blocked ? "pointer" : "not-allowed" }}>ส่งคำขอจอง</button>
+          <button onClick={onClose} disabled={loading} style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 9, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 13, cursor: loading ? "not-allowed" : "pointer", fontFamily: font }}>ยกเลิก</button>
+          <button onClick={handleSubmit} disabled={!f.startDate || !f.endDate || !f.purpose || !!blocked || loading} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, fontFamily: font, background: f.startDate && f.endDate && f.purpose && !blocked && !loading ? C.t1 : "#E5E5EA", color: f.startDate && f.endDate && f.purpose && !blocked && !loading ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.startDate && f.endDate && f.purpose && !blocked && !loading ? "pointer" : "not-allowed" }}>{loading ? "กำลังส่งคำขอ..." : "ส่งคำขอจอง"}</button>
         </div>
       </div>
     </div>

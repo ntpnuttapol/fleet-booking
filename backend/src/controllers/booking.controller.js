@@ -45,18 +45,18 @@ const createBooking = async (req, res) => {
             include: { user: true, car: true }
         });
 
-        // Trigger Notification to Admins
+        // Trigger Notification to Admins (Run in background)
         const admins = await prisma.user.findMany({ where: { role: 'admin' } });
-        for (const admin of admins) {
-            await notificationService.dispatch({
+        Promise.all(admins.map(admin =>
+            notificationService.dispatch({
                 userId: admin.id,
                 type: 'new_booking',
                 data: {
                     requesterName: booking.user.name,
                     bookingId: booking.id
                 }
-            });
-        }
+            }).catch(e => console.error("Notification Error:", e))
+        ));
 
         res.status(201).json(booking);
     } catch (error) {
@@ -76,14 +76,14 @@ const updateBookingStatus = async (req, res) => {
             include: { car: true }
         });
 
-        // Trigger Notification to User
-        await notificationService.dispatch({
+        // Trigger Notification to User (Run in background)
+        notificationService.dispatch({
             userId: booking.userId,
             type: status === 'approved' ? 'booking_approved' : 'booking_rejected',
             data: {
                 bookingId: booking.id
             }
-        });
+        }).catch(e => console.error("Notification Error:", e));
 
         res.json(booking);
     } catch (error) {
