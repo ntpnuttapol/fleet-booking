@@ -447,10 +447,10 @@ export default function App() {
         </div>
       </div>}
 
-      <div style={{ flex: 1, overflow: "auto" }}>
+      <div style={{ flex: 1, overflowX: "hidden", overflowY: "auto", minWidth: 0 }}>
         <TopBar unread={unread} showPanel={showNotif} toggle={() => setShowNotif(!showNotif)} notifs={myNotifs} markRead={markRead} markAllRead={markAllRead} close={() => setShowNotif(false)} isMobile={isMobile} openMenu={() => setMobileMenu(true)}
           onNavigate={n => { if (isAdmin && n.type === "new_booking") setPage("bookings"); else setPage("mybookings"); markRead(n.id); setShowNotif(false); }} />
-        <div style={{ maxWidth: 1100, margin: "0 auto", padding: isMobile ? "12px 16px 80px" : "12px 36px 32px" }}>
+        <div style={{ width: "100%", maxWidth: 1100, margin: "0 auto", padding: isMobile ? "12px 16px 80px" : "12px 36px 32px" }}>
           {page === "dashboard" && isAdmin && <Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} />}
           {page === "calendar" && <Calendar bookings={bookings} cars={cars} users={users} m={isMobile} blackouts={blackoutDates} isAdmin={isAdmin} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
           {page === "cars" && <Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setCarFormModal({})} onEditCarClick={c => setCarFormModal(c)} />}
