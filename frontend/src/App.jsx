@@ -45,7 +45,7 @@ function useWindowWidth() {
 }
 
 const font = `'Noto Sans Thai', 'DM Sans', system-ui, sans-serif`;
-const C = { bg: "#F8FAFC", card: "#FFFFFF", sidebar: "#0F172A", accent: "#2563EB", accentLight: "#DBEAFE", border: "#E2E8F0", t1: "#0F172A", t2: "#64748B", t3: "#94A3B8", danger: "#EF4444", success: "#10B981", warn: "#F59E0B" };
+const C = { bg: "#F8FAFC", card: "#FFFFFF", sidebar: "#064E3B", accent: "#059669", accentLight: "#D1FAE5", border: "#E2E8F0", t1: "#0F172A", t2: "#64748B", t3: "#94A3B8", danger: "#EF4444", success: "#10B981", warn: "#F59E0B" };
 
 // ─── Confirm Dialog ──────────────────────────────────────────
 function ConfirmDialog({ title, message, confirmLabel, confirmColor, onConfirm, onCancel, icon }) {
@@ -452,7 +452,7 @@ function TopBar({ unread, showPanel, toggle, notifs, markRead, markAllRead, clos
 // ─── Login ───────────────────────────────────────────────────
 function LoginPage({ form, setForm, error, onLogin, isMobile }) {
   return (
-    <div style={{ fontFamily: font, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,#0F172A,#1E3A5F,#0F172A)", padding: 16 }}>
+    <div style={{ fontFamily: font, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,#064E3B,#047857,#064E3B)", padding: 16 }}>
       <div style={{ width: "100%", maxWidth: 380, padding: isMobile ? "36px 24px" : "44px 36px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 18, backdropFilter: "blur(20px)", animation: "scaleIn 0.4s" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}><img src="/logo.png" alt="logo" style={{ height: 60, objectFit: "contain", marginBottom: 12 }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} /><div style={{ fontSize: 44, marginBottom: 10, display: "none" }}>🏢</div><div style={{ fontSize: 24, fontWeight: 800, color: "#fff" }}>Polyfoam</div><div style={{ fontSize: 12, color: C.t3, marginTop: 5 }}>ระบบจองรถบริษัท</div></div>
         {error && <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "8px 12px", marginBottom: 14, color: "#FCA5A5", fontSize: 12 }}>{error}</div>}
@@ -729,10 +729,11 @@ function Bookings({ bookings, cars, users, onApprove, onReject, onCancel, m }) {
 // ─── Cars Page ───────────────────────────────────────────────
 function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser }) {
   const [filter, setFilter] = useState("all");
+  const [hideUnavailable, setHideUnavailable] = useState(false);
 
   // ซ่อนรถที่ "ไม่พร้อมใช้งาน" (สถานะไม่ใช่ available) จากผู้ใช้ทั่วไป
-  // แอดมินยังคงเห็นรถทุกคันเพื่อการจัดการ
-  const visibleCars = isAdmin ? cars : cars.filter(c => c.status === "available");
+  // แอดมินสามารถเลือกซ่อนได้ผ่าน Toggle
+  const visibleCars = (!isAdmin || hideUnavailable) ? cars.filter(c => c.status === "available") : cars;
 
   const filtered = filter === "all" ? visibleCars : visibleCars.filter(c => c.type === filter);
   const types = ["all", ...new Set(visibleCars.map(c => c.type))];
@@ -745,8 +746,16 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser }) {
     <div style={{ animation: "fadeIn 0.3s" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: m ? "flex-start" : "flex-end", marginBottom: 20, flexDirection: m ? "column" : "row", gap: 10 }}>
         <div><h1 style={{ fontSize: m ? 20 : 26, fontWeight: 800, margin: 0 }}>{isAdmin ? "จัดการรถ" : "จองรถ"}</h1><p style={{ color: C.t2, fontSize: 13, margin: "4px 0 0" }}>{isAdmin ? "รายการรถทั้งหมด" : "เลือกรถที่ต้องการจอง"}</p></div>
-        <div style={{ display: "flex", gap: 4, background: C.card, borderRadius: 9, padding: 3, border: `1px solid ${C.border}`, overflowX: "auto" }}>
-          {types.map(t => (<button key={t} onClick={() => setFilter(t)} style={{ padding: "6px 14px", borderRadius: 7, border: "none", background: filter === t ? C.accent : "transparent", color: filter === t ? "#fff" : C.t2, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font, whiteSpace: "nowrap" }}>{tl[t] || t}</button>))}
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 4, background: C.card, borderRadius: 9, padding: 3, border: `1px solid ${C.border}`, overflowX: "auto" }}>
+            {types.map(t => (<button key={t} onClick={() => setFilter(t)} style={{ padding: "6px 14px", borderRadius: 7, border: "none", background: filter === t ? C.accent : "transparent", color: filter === t ? "#fff" : C.t2, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font, whiteSpace: "nowrap" }}>{tl[t] || t}</button>))}
+          </div>
+          {isAdmin && (
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: C.t2, cursor: "pointer", background: C.card, padding: "6px 14px", borderRadius: 8, border: `1px solid ${C.border}` }}>
+              <input type="checkbox" checked={hideUnavailable} onChange={e => setHideUnavailable(e.target.checked)} style={{ cursor: "pointer", accentColor: C.accent }} />
+              ซ่อนรถที่ไม่พร้อมใช้งาน
+            </label>
+          )}
         </div>
       </div>
       {blackouts.length > 0 && (
