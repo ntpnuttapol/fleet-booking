@@ -145,6 +145,7 @@ export default function App() {
   const [toast, setToast] = useState(null);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [loginError, setLoginError] = useState("");
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [confirm, setConfirm] = useState(null);
@@ -285,18 +286,22 @@ export default function App() {
   }, []);
 
   if (!currentUser) {
-    return <LoginPage form={loginForm} setForm={setLoginForm} error={loginError} isMobile={isMobile} onLogin={() => {
+    return <LoginPage form={loginForm} setForm={setLoginForm} error={loginError} isMobile={isMobile} isSuccess={loginSuccess} onLogin={() => {
       fetch(`${API_BASE}/api/users/login`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(loginForm)
       })
-        .then(res => res.ok ? res.json() : res.json().then(err => Promise.reject(err.error || "อีเมลหรือรหัสผ่านไม่ถูกต้อง")))
+        .then(res => res.ok ? res.json() : res.json().then(err => Promise.reject(err.error || "Invalid email or password")))
         .then(data => {
           localStorage.setItem('fleetbook_token', data.token);
-          setCurrentUser(data.user);
-          setPage(data.user.role === "admin" ? "dashboard" : "cars");
+          setLoginSuccess(true);
           setLoginError("");
+          setTimeout(() => {
+            setCurrentUser(data.user);
+            setPage(data.user.role === "admin" ? "dashboard" : "cars");
+            setLoginSuccess(false);
+          }, 1500);
         })
-        .catch(err => setLoginError(typeof err === 'string' ? err : err?.message || err?.error || "เกิดข้อผิดพลาดในการเชื่อมต่อ"));
+        .catch(err => setLoginError(typeof err === 'string' ? err : err?.message || err?.error || "Connection error"));
     }} />;
   }
 
@@ -562,7 +567,7 @@ function Navbar({ navItems, page, onNav, user, bookings, isAdmin, unread, showPa
 
 
 // ─── Login (Landing Page Style) ──────────────────────────────
-function LoginPage({ form, setForm, error, onLogin, isMobile }) {
+function LoginPage({ form, setForm, error, onLogin, isMobile, isSuccess }) {
   return (
     <div style={{ fontFamily: font, minHeight: "100dvh", display: "flex", flexDirection: isMobile ? "column" : "row", background: "linear-gradient(135deg, #F4FAFA 0%, #E0F2F1 100%)", overflow: "hidden" }}>
 
@@ -575,25 +580,25 @@ function LoginPage({ form, setForm, error, onLogin, isMobile }) {
 
         <div>
           <div style={{ display: "inline-block", padding: "6px 16px", background: `${C.accent}15`, color: C.accent, borderRadius: 20, fontSize: 13, fontWeight: 700, marginBottom: 24, border: `1px solid ${C.accent}30`, animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.1s" }}>
-            ✨ ระบบจัดการยานพาหนะอัจฉริยะ
+            ✨ Smart Fleet Management
           </div>
           <h1 style={{ fontSize: isMobile ? 36 : 64, fontWeight: 800, color: C.t1, lineHeight: 1.15, margin: "0 0 24px", letterSpacing: "-1.5px", animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.2s" }}>
-            จองรถบริษัท<br />
-            <span style={{ color: C.accent, background: `linear-gradient(90deg, ${C.accent}, #00D3B9)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>ง่าย อนุมัติไว</span> ในที่เดียว
+            Corporate Car Booking<br />
+            <span style={{ color: C.accent, background: `linear-gradient(90deg, ${C.accent}, #00D3B9)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Made Simple</span> & Fast
           </h1>
           <p style={{ fontSize: isMobile ? 15 : 18, color: C.t2, lineHeight: 1.6, margin: "0 0 50px", maxWidth: 500, fontWeight: 500, animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.3s" }}>
-            ยกระดับการจัดการรถยนต์องค์กร ด้วยระบบที่ออกแบบมาให้ใช้งานง่าย รวดเร็ว และโปร่งใส สามารถตรวจสอบสถานะได้แบบ Real-time
+            Elevate your corporate fleet management with a system designed for ease of use, speed, and real-time transparency.
           </p>
 
           {!isMobile && (
             <div style={{ display: "flex", gap: 24, animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.4s" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", background: "rgba(255,255,255,0.6)", borderRadius: 16, backdropFilter: "blur(10px)", border: `1px solid rgba(255,255,255,0.8)`, animation: "float 6s ease-in-out infinite" }}>
                 <span style={{ width: 44, height: 44, borderRadius: 14, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, boxShadow: "0 4px 12px rgba(0,180,159,0.1)", color: C.accent }}>🚗</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>เลือกรถหลากหลาย</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>Wide Selection</span>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", background: "rgba(255,255,255,0.6)", borderRadius: 16, backdropFilter: "blur(10px)", border: `1px solid rgba(255,255,255,0.8)`, animation: "float 6s ease-in-out infinite", animationDelay: "1s" }}>
                 <span style={{ width: 44, height: 44, borderRadius: 14, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, boxShadow: "0 4px 12px rgba(0,180,159,0.1)", color: C.accent }}>⚡</span>
-                <span style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>จองรวดเร็ว</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>Fast Approval</span>
               </div>
             </div>
           )}
@@ -607,21 +612,34 @@ function LoginPage({ form, setForm, error, onLogin, isMobile }) {
 
       {/* Right Side: Login Box */}
       <div style={{ flex: isMobile ? "none" : "0 0 45%", display: "flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "0 20px 40px" : "40px 60px 40px 0", position: "relative", zIndex: 2 }}>
-        <div style={{ width: "100%", maxWidth: 440, padding: isMobile ? "32px 24px" : "50px 44px", background: "#FFFFFF", border: `1px solid rgba(255,255,255,0.9)`, borderRadius: 32, boxShadow: "0 30px 80px rgba(0,180,159,0.12), 0 0 0 1px rgba(0,180,159,0.02)", animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.2s" }}>
-          <div style={{ textAlign: "center", marginBottom: 36 }}>
-            <div style={{ fontSize: 32, fontWeight: 800, color: C.t1, marginBottom: 10, letterSpacing: "-0.5px" }}>เข้าระบบ</div>
-            <div style={{ fontSize: 14, color: C.t2, fontWeight: 500 }}>กรอกอีเมลและรหัสผ่านเพื่อเข้าใช้งาน</div>
-          </div>
-          {error && <div style={{ background: "rgba(255,59,48,0.08)", border: "1px solid rgba(255,59,48,0.2)", borderRadius: 14, padding: "12px 16px", marginBottom: 20, color: C.danger, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>⚠️</span> {error}</div>}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: C.t2, marginBottom: 8 }}>อีเมล</label>
-            <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "14px 16px", background: "#F4FAFA", border: `2px solid transparent`, borderRadius: 14, color: C.t1, fontSize: 14, fontFamily: font, transition: "0.2s" }} onFocus={e => { e.target.style.background = "#fff"; e.target.style.borderColor = C.accent; }} onBlur={e => { e.target.style.background = "#F4FAFA"; e.target.style.borderColor = "transparent"; }} />
-          </div>
-          <div style={{ marginBottom: 32 }}>
-            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: C.t2, marginBottom: 8 }}>รหัสผ่าน</label>
-            <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••••••" onKeyDown={e => e.key === "Enter" && onLogin()} style={{ width: "100%", padding: "14px 16px", background: "#F4FAFA", border: `2px solid transparent`, borderRadius: 14, color: C.t1, fontSize: 14, fontFamily: font, transition: "0.2s", letterSpacing: 2 }} onFocus={e => { e.target.style.background = "#fff"; e.target.style.borderColor = C.accent; }} onBlur={e => { e.target.style.background = "#F4FAFA"; e.target.style.borderColor = "transparent"; }} />
-          </div>
-          <button onClick={onLogin} style={{ width: "100%", padding: "14px", background: C.accent, color: "#fff", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: font, transition: "0.2s", boxShadow: `0 8px 20px ${C.accent}40` }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 12px 24px ${C.accent}50`; }} onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 8px 20px ${C.accent}40`; }}>เข้าสู่ระบบ</button>
+        <div style={{ width: "100%", maxWidth: 440, padding: isMobile ? "32px 24px" : "50px 44px", background: "#FFFFFF", border: `1px solid rgba(255,255,255,0.9)`, borderRadius: 32, boxShadow: "0 30px 80px rgba(0,180,159,0.12), 0 0 0 1px rgba(0,180,159,0.02)", animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.2s", position: "relative", overflow: "hidden" }}>
+
+          {isSuccess ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 280, animation: "fadeIn 0.3s" }}>
+              <div style={{ width: 80, height: 80, borderRadius: 40, background: C.accent, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, marginBottom: 24, animation: "scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both" }}>
+                ✓
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: C.t1, animation: "slideUpFade 0.5s ease-out both", animationDelay: "0.2s" }}>Welcome back!</div>
+              <div style={{ fontSize: 14, color: C.t2, marginTop: 8, fontWeight: 500, animation: "slideUpFade 0.5s ease-out both", animationDelay: "0.3s" }}>Redirecting...</div>
+            </div>
+          ) : (
+            <>
+              <div style={{ textAlign: "center", marginBottom: 36, transition: "opacity 0.3s" }}>
+                <div style={{ fontSize: 32, fontWeight: 800, color: C.t1, marginBottom: 10, letterSpacing: "-0.5px" }}>Sign In</div>
+                <div style={{ fontSize: 14, color: C.t2, fontWeight: 500 }}>Enter your email and password to continue</div>
+              </div>
+              {error && <div style={{ background: "rgba(255,59,48,0.08)", border: "1px solid rgba(255,59,48,0.2)", borderRadius: 14, padding: "12px 16px", marginBottom: 20, color: C.danger, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>⚠️</span> {error}</div>}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: C.t2, marginBottom: 8 }}>Email Address</label>
+                <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "14px 16px", background: "#F4FAFA", border: `2px solid transparent`, borderRadius: 14, color: C.t1, fontSize: 14, fontFamily: font, transition: "0.2s" }} onFocus={e => { e.target.style.background = "#fff"; e.target.style.borderColor = C.accent; }} onBlur={e => { e.target.style.background = "#F4FAFA"; e.target.style.borderColor = "transparent"; }} />
+              </div>
+              <div style={{ marginBottom: 32 }}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: C.t2, marginBottom: 8 }}>Password</label>
+                <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••••••" onKeyDown={e => e.key === "Enter" && onLogin()} style={{ width: "100%", padding: "14px 16px", background: "#F4FAFA", border: `2px solid transparent`, borderRadius: 14, color: C.t1, fontSize: 14, fontFamily: font, transition: "0.2s", letterSpacing: 2 }} onFocus={e => { e.target.style.background = "#fff"; e.target.style.borderColor = C.accent; }} onBlur={e => { e.target.style.background = "#F4FAFA"; e.target.style.borderColor = "transparent"; }} />
+              </div>
+              <button onClick={onLogin} style={{ width: "100%", padding: "14px", background: C.accent, color: "#fff", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: font, transition: "0.2s", boxShadow: `0 8px 20px ${C.accent}40` }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 12px 24px ${C.accent}50`; }} onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 8px 20px ${C.accent}40`; }}>Sign In</button>
+            </>
+          )}
         </div>
       </div>
     </div>
