@@ -59,4 +59,25 @@ const createCar = async (req, res) => {
     }
 };
 
-module.exports = { getCars, getCarById, updateCarStatus, createCar };
+const editCar = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, licensePlate, type, color, image } = req.body;
+
+        if (!name || !licensePlate || !type || !color || !image) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const updatedCar = await prisma.car.update({
+            where: { id: parseInt(id) },
+            data: { name, licensePlate, type, color, image }
+        });
+
+        res.json(updatedCar);
+    } catch (error) {
+        console.error("Error editing car:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { getCars, getCarById, updateCarStatus, createCar, editCar };

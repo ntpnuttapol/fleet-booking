@@ -78,14 +78,15 @@ function Toggle({ checked, onChange, label }) {
   );
 }
 
-// ─── Add Car Modal ───────────────────────────────────────────
-function AddCarModal({ onClose, onSubmit }) {
-  const [form, setForm] = useState({ name: "", licensePlate: "", type: "Sedan", color: "#059669", image: "🚗" });
+// ─── Car Form Modal ───────────────────────────────────────────
+function CarFormModal({ initialData, onClose, onSubmit }) {
+  const isEdit = !!initialData?.id;
+  const [form, setForm] = useState(initialData?.id ? { ...initialData } : { name: "", licensePlate: "", type: "Sedan", color: "#059669", image: "🚗" });
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, backdropFilter: "blur(3px)", animation: "fadeIn 0.2s" }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: C.card, width: 400, maxWidth: "90vw", borderRadius: 16, padding: "28px 28px 24px", animation: "scaleIn 0.2s ease", boxShadow: "0 20px 50px rgba(0,0,0,0.15)" }}>
-        <h2 style={{ fontSize: 18, fontWeight: 800, margin: "0 0 16px" }}>เพิ่มรถใหม่</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 800, margin: "0 0 16px" }}>{isEdit ? "แก้ไขข้อมูลรถ" : "เพิ่มรถใหม่"}</h2>
 
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.t2, marginBottom: 6 }}>ชื่อรถ / รุ่น</label>
@@ -123,7 +124,7 @@ function AddCarModal({ onClose, onSubmit }) {
 
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 10, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
-          <button onClick={() => onSubmit(form)} disabled={!form.name || !form.licensePlate} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 10, background: form.name && form.licensePlate ? C.t1 : "#E5E5EA", color: form.name && form.licensePlate ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: form.name && form.licensePlate ? "pointer" : "not-allowed", fontFamily: font }}>เพิ่มรถคันใหม่</button>
+          <button onClick={() => onSubmit(form)} disabled={!form.name || !form.licensePlate} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 10, background: form.name && form.licensePlate ? C.t1 : "#E5E5EA", color: form.name && form.licensePlate ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: form.name && form.licensePlate ? "pointer" : "not-allowed", fontFamily: font }}>{isEdit ? "บันทึกการแก้ไข" : "เพิ่มรถคันใหม่"}</button>
         </div>
       </div>
     </div>
@@ -140,7 +141,7 @@ export default function App() {
   const [blackoutDates, setBlackoutDates] = useState([]);
   const [page, setPage] = useState("dashboard");
   const [bookingModal, setBookingModal] = useState(null);
-  const [addCarModal, setAddCarModal] = useState(false);
+  const [carFormModal, setCarFormModal] = useState(null);
   const [toast, setToast] = useState(null);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [loginError, setLoginError] = useState("");
@@ -377,18 +378,27 @@ export default function App() {
       }).catch(console.error);
   };
 
-  const handleCreateCar = (newCarData) => {
-    fetch(`${API_BASE}/api/cars`, {
-      method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem('fleetbook_token')}` },
-      body: JSON.stringify(newCarData)
+  const handleSaveCar = (carData) => {
+    const isEdit = !!carData.id;
+    const url = isEdit ? `${API_BASE}/api/cars/${carData.id}` : `${API_BASE}/api/cars`;
+    const method = isEdit ? "PUT" : "POST";
+
+    fetch(url, {
+      method, headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem('fleetbook_token')}` },
+      body: JSON.stringify(carData)
     }).then(res => res.json())
-      .then(created => {
-        setCars(prev => [...prev, created]);
-        setAddCarModal(false);
-        showToast("เพิ่มรถคันใหม่สำเร็จ", "✨");
+      .then(savedCar => {
+        if (isEdit) {
+          setCars(prev => prev.map(c => c.id === savedCar.id ? savedCar : c));
+          showToast("แก้ไขข้อมูลรถสำเร็จ", "🚗");
+        } else {
+          setCars(prev => [...prev, savedCar]);
+          showToast("เพิ่มรถคันใหม่สำเร็จ", "✨");
+        }
+        setCarFormModal(null);
       }).catch(err => {
         console.error(err);
-        showToast("เกิดข้อผิดพลาดในการเพิ่มรถ", "❌");
+        showToast(isEdit ? "เกิดข้อผิดพลาดในการแก้ไขรถ" : "เกิดข้อผิดพลาดในการเพิ่มรถ", "❌");
       });
   };
 
@@ -443,14 +453,14 @@ export default function App() {
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: isMobile ? "12px 16px 80px" : "12px 36px 32px" }}>
           {page === "dashboard" && isAdmin && <Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} />}
           {page === "calendar" && <Calendar bookings={bookings} cars={cars} users={users} m={isMobile} blackouts={blackoutDates} isAdmin={isAdmin} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
-          {page === "cars" && <Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setAddCarModal(true)} />}
+          {page === "cars" && <Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setCarFormModal({})} onEditCarClick={c => setCarFormModal(c)} />}
           {page === "bookings" && isAdmin && <Bookings bookings={bookings} cars={cars} users={users} onApprove={handleApprove} onReject={handleReject} onCancel={handleCancel} m={isMobile} />}
           {page === "mybookings" && <MyBookings bookings={myBookings} cars={cars} onCancel={handleCancel} m={isMobile} />}
           {page === "users" && isAdmin && <UsersManage users={users} setUsers={setUsers} m={isMobile} />}
           {page === "reports" && isAdmin && <Reports bookings={bookings} cars={cars} users={users} m={isMobile} />}
           {page === "settings" && <Settings currentUser={currentUser} onUpdate={handleUpdateUser} onChangePassword={handleChangePassword} m={isMobile} isAdmin={isAdmin} blackouts={blackoutDates} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
         </div>
-        {addCarModal && <AddCarModal onClose={() => setAddCarModal(false)} onSubmit={handleCreateCar} />}
+        {carFormModal && <CarFormModal initialData={Object.keys(carFormModal).length > 0 ? carFormModal : null} onClose={() => setCarFormModal(null)} onSubmit={handleSaveCar} />}
         {bookingModal && <BookingModal car={bookingModal} onClose={() => setBookingModal(null)} onSubmit={handleBook} m={isMobile} blackouts={blackoutDates} />}
         {confirm && <ConfirmDialog {...confirm} onCancel={() => setConfirm(null)} />}
         {toast && <div style={{ position: "fixed", bottom: isMobile ? 16 : 28, left: isMobile ? 16 : "auto", right: isMobile ? 16 : 28, background: C.t1, color: "#fff", padding: "12px 20px", borderRadius: 12, fontSize: 13, fontWeight: 500, fontFamily: font, boxShadow: "0 8px 30px rgba(0,0,0,0.2)", animation: "slideUp 0.3s", zIndex: 999, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>{toast.icon}</span> {toast.msg}</div>}
@@ -808,13 +818,13 @@ function Bookings({ bookings, cars, users, onApprove, onReject, onCancel, m }) {
 }
 
 // ─── Cars Page ───────────────────────────────────────────────
-function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onToggleCarStatus, onAddCarClick }) {
+function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onToggleCarStatus, onAddCarClick, onEditCarClick }) {
   const [filter, setFilter] = useState("all");
   const [hideUnavailable, setHideUnavailable] = useState(false);
 
-  // ซ่อนรถที่ "ไม่พร้อมใช้งาน" (สถานะไม่ใช่ available) จากผู้ใช้ทั่วไป
-  // แอดมินสามารถเลือกซ่อนได้ผ่าน Toggle
-  const visibleCars = (!isAdmin || hideUnavailable) ? cars.filter(c => c.status === "available") : cars;
+  // เอารถคันที่ปิดไว้ไม่ใช้ออกไป (สถานะ inactive ไม่แสดงเลย)
+  // ซ่อนรถที่ "ไม่พร้อมใช้งาน" (สถานะไม่ใช่ available) จากผู้ใช้ทั่วไป หรือแอดมินที่เลือกซ่อน
+  const visibleCars = cars.filter(c => c.status !== "inactive" && (!isAdmin || hideUnavailable ? c.status === "available" : true));
 
   const filtered = filter === "all" ? visibleCars : visibleCars.filter(c => c.type === filter);
   const types = ["all", ...new Set(visibleCars.map(c => c.type))];
@@ -862,9 +872,14 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
                 <div style={{ fontSize: 15, fontWeight: 700, color: C.t1 }}>{car.name}</div>
                 <div style={{ display: "flex", gap: 14, margin: "6px 0 14px" }}><span style={{ fontSize: 11, color: C.t2 }}>🔖 {car.licensePlate}</span><span style={{ fontSize: 11, color: C.t2 }}>🏷️ {car.type}</span></div>
                 {isAdmin && (
-                  <button onClick={() => onToggleCarStatus(car.id, car.status)} style={{ width: "100%", padding: "7px", borderRadius: 8, border: `1px solid ${C.border}`, background: "#fff", color: car.status === "available" ? C.danger : C.t1, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font, marginBottom: 8, transition: "0.2s" }}>
-                    {car.status === "available" ? "ปิดใช้งานรถคันนี้" : "เปิดใช้งานปกติ"}
-                  </button>
+                  <div style={{ display: "flex", gap: 10, marginBottom: 8 }}>
+                    <button onClick={() => onEditCarClick(car)} style={{ flex: 1, padding: "7px", borderRadius: 8, border: `1px solid ${C.border}`, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font, transition: "0.2s" }}>
+                      ✏️ แก้ไขข้อมูลรถ
+                    </button>
+                    <button onClick={() => onToggleCarStatus(car.id, car.status)} style={{ flex: 1, padding: "7px", borderRadius: 8, border: `1px solid ${C.border}`, background: "#fff", color: car.status === "available" ? C.danger : C.t1, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font, transition: "0.2s" }}>
+                      {car.status === "available" ? "ปิดใช้งานรถคันนี้" : "เปิดใช้งานปกติ"}
+                    </button>
+                  </div>
                 )}
                 <button onClick={() => !isDisabled && onBook(car)} disabled={isDisabled} style={{ width: "100%", padding: "9px", borderRadius: 9, border: "none", fontFamily: font, background: !isDisabled ? C.t1 : "#F5F5F7", color: !isDisabled ? "#fff" : C.t3, fontWeight: 700, fontSize: 12, cursor: !isDisabled ? "pointer" : "not-allowed" }}>{!avail ? "ไม่พร้อมใช้งาน" : active ? "ถูกจองแล้ว" : hasActiveBooking ? "จำกัด 1 คัน/คน" : "จองรถคันนี้"}</button>
               </div>

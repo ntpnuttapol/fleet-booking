@@ -6,5 +6,6 @@ router.get('/', carController.getCars);
 router.get('/:id', carController.getCarById);
 router.patch('/:id/status', carController.updateCarStatus);
 router.post('/', carController.createCar);
+router.put('/:id', carController.editCar);
 
 module.exports = router;
