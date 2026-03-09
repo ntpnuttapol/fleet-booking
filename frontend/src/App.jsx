@@ -441,11 +441,11 @@ export default function App() {
   };
 
   const mainMenuItems = isAdmin
-    ? [{ key: "dashboard", icon: "\ud83d\udcca", label: "\u0e41\u0e14\u0e0a\u0e1a\u0e2d\u0e23\u0e4c\u0e14" }, { key: "cars", icon: "\u2795", label: "\u0e08\u0e2d\u0e07\u0e23\u0e16" }, { key: "calendar", icon: "\ud83d\udcc5", label: "\u0e1b\u0e0f\u0e34\u0e17\u0e34\u0e19" }, { key: "mybookings", icon: "\ud83d\udccb", label: "\u0e01\u0e32\u0e23\u0e08\u0e2d\u0e07\u0e02\u0e2d\u0e07\u0e09\u0e31\u0e19" }]
-    : [{ key: "cars", icon: "\ud83d\ude97", label: "\u0e08\u0e2d\u0e07\u0e23\u0e16" }, { key: "calendar", icon: "\ud83d\udcc5", label: "\u0e1b\u0e0f\u0e34\u0e17\u0e34\u0e19" }, { key: "mybookings", icon: "\ud83d\udccb", label: "\u0e01\u0e32\u0e23\u0e08\u0e2d\u0e07\u0e02\u0e2d\u0e07\u0e09\u0e31\u0e19" }];
+    ? [{ key: "dashboard", icon: "📊", label: "แดชบอร์ด" }, { key: "cars", icon: "➕", label: "จองรถ" }, { key: "calendar", icon: "📅", label: "ปฏิทิน" }, { key: "mybookings", icon: "📋", label: "การจองของฉัน" }]
+    : [{ key: "cars", icon: "🚗", label: "จองรถ" }, { key: "calendar", icon: "📅", label: "ปฏิทิน" }, { key: "mybookings", icon: "📋", label: "การจองของฉัน" }];
   const adminMenuItems = isAdmin
-    ? [{ key: "bookings", icon: "\ud83d\udccb", label: "\u0e04\u0e33\u0e02\u0e2d\u0e08\u0e2d\u0e07" }, { key: "users", icon: "\ud83d\udc65", label: "\u0e1c\u0e39\u0e49\u0e43\u0e0a\u0e49\u0e07\u0e32\u0e19" }, { key: "reports", icon: "\ud83d\udcca", label: "\u0e23\u0e32\u0e22\u0e07\u0e32\u0e19" }, { key: "settings", icon: "\u2699\ufe0f", label: "\u0e15\u0e31\u0e49\u0e07\u0e04\u0e48\u0e32" }]
-    : [{ key: "settings", icon: "\u2699\ufe0f", label: "\u0e15\u0e31\u0e49\u0e07\u0e04\u0e48\u0e32" }];
+    ? [{ key: "bookings", icon: "📋", label: "คำขอจอง" }, { key: "users", icon: "👥", label: "ผู้ใช้งาน" }, { key: "reports", icon: "📊", label: "รายงาน" }, { key: "settings", icon: "⚙️", label: "ตั้งค่า" }]
+    : [{ key: "settings", icon: "⚙️", label: "ตั้งค่า" }];
   const allNavItems = [...mainMenuItems, ...adminMenuItems];
 
   const nav = (p) => { setPage(p); setMobileMenu(false); };
@@ -515,7 +515,7 @@ export default function App() {
           <div style={{ position: "relative", width: 280, height: "100%", background: "#fff", display: "flex", flexDirection: "column", animation: "slideRight 0.2s", boxShadow: "0 8px 32px rgba(107,91,123,0.15)" }}>
             <div style={{ padding: "24px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 20, fontWeight: 800, background: "linear-gradient(135deg, #4A3D5C, #3A6B8C)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Polyfoam</span>
-              <button onClick={() => setMobileMenu(false)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: C.t3 }}>\u2715</button>
+              <button onClick={() => setMobileMenu(false)} style={{ background: "none", border: "none", fontSize: 24, cursor: "pointer", color: C.t3 }}>✕</button>
             </div>
             <nav style={{ flex: 1, padding: "16px 12px" }}>
               {allNavItems.map(n => (
@@ -530,7 +530,7 @@ export default function App() {
                 <div style={{ width: 36, height: 36, background: "linear-gradient(135deg, #F5C4AB, #F0B0C4)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700 }}>{currentUser.name?.substring(0, 2)}</div>
                 <div><div style={{ fontSize: 16, fontWeight: 700, color: C.t1 }}>{currentUser.name}</div><div style={{ fontSize: 13, color: C.t3 }}>{currentUser.department}</div></div>
               </div>
-              <button onClick={handleLogout} style={{ width: "100%", padding: "14px", border: `1px solid rgba(239,68,68,0.2)`, borderRadius: 12, background: "#FCF0F3", color: "#9C4462", cursor: "pointer", fontSize: 15, fontFamily: font, fontWeight: 700 }}>\u0e2d\u0e2d\u0e01\u0e08\u0e32\u0e01\u0e23\u0e30\u0e1a\u0e1a</button>
+              <button onClick={handleLogout} style={{ width: "100%", padding: "14px", border: `1px solid rgba(239,68,68,0.2)`, borderRadius: 12, background: "#FCF0F3", color: "#9C4462", cursor: "pointer", fontSize: 15, fontFamily: font, fontWeight: 700 }}>ออกจากระบบ</button>
             </div>
           </div>
         </div>
@@ -569,14 +569,14 @@ function NotifBell({ unread, showPanel, toggle, notifs, markRead, markAllRead, c
 
   return (
     <div ref={ref} style={{ position: "relative" }}>
-      <button onClick={toggle} style={{ width: 40, height: 40, borderRadius: 10, border: `1.5px solid ${showPanel ? "#C9B8DB" : C.border}`, background: showPanel ? "#F4F0F8" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, transition: "all 0.2s", position: "relative", animation: unread > 0 && !showPanel ? "bellShake 0.6s" : "none" }}>\ud83d\udd14
+      <button onClick={toggle} style={{ width: 40, height: 40, borderRadius: 10, border: `1.5px solid ${showPanel ? "#C9B8DB" : C.border}`, background: showPanel ? "#F4F0F8" : "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, transition: "all 0.2s", position: "relative", animation: unread > 0 && !showPanel ? "bellShake 0.6s" : "none" }}>🔔
         {unread > 0 && <><span style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, background: "#F0B0C4", borderRadius: "50%", border: "2px solid white" }} /><span style={{ position: "absolute", top: 6, right: 6, width: 8, height: 8, borderRadius: "50%", background: "#F0B0C4", animation: "pulseRing 1.5s ease-out infinite", opacity: 0.4 }} /></>}
       </button>
       {showPanel && (
         <div style={{ position: "absolute", top: "100%", right: isMobile ? -60 : -10, marginTop: 12, width: 340, maxWidth: "90vw", background: C.card, borderRadius: 18, boxShadow: "0 8px 32px rgba(107,91,123,0.12)", border: `1px solid ${C.border}`, overflow: "hidden", zIndex: 60, animation: "panelSlide 0.2s" }}>
-          <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}><div style={{ fontSize: 15, fontWeight: 800 }}>\u0e01\u0e32\u0e23\u0e41\u0e08\u0e49\u0e07\u0e40\u0e15\u0e37\u0e2d\u0e19</div>{unread > 0 && <button onClick={markAllRead} style={{ fontSize: 11, color: "#6B5B7B", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}>\u0e17\u0e33\u0e40\u0e04\u0e23\u0e37\u0e48\u0e2d\u0e07\u0e2b\u0e21\u0e32\u0e22\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14</button>}</div>
+          <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}><div style={{ fontSize: 15, fontWeight: 800 }}>การแจ้งเตือน</div>{unread > 0 && <button onClick={markAllRead} style={{ fontSize: 11, color: "#6B5B7B", background: "none", border: "none", cursor: "pointer", fontWeight: 700 }}>ทำเครื่องหมายทั้งหมด</button>}</div>
           <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
-            {notifs.length === 0 ? <div style={{ padding: 40, textAlign: "center", color: C.t3, fontSize: 14, display: "flex", flexDirection: "column", gap: 12, fontWeight: 500 }}><span style={{ fontSize: 36 }}>\ud83d\udced</span>\u0e44\u0e21\u0e48\u0e21\u0e35\u0e01\u0e32\u0e23\u0e41\u0e08\u0e49\u0e07\u0e40\u0e15\u0e37\u0e2d\u0e19\u0e43\u0e2b\u0e21\u0e48</div> :
+            {notifs.length === 0 ? <div style={{ padding: 40, textAlign: "center", color: C.t3, fontSize: 14, display: "flex", flexDirection: "column", gap: 12, fontWeight: 500 }}><span style={{ fontSize: 36 }}>📭</span>ไม่มีการแจ้งเตือนใหม่</div> :
               notifs.map(n => (<div key={n.id} onClick={() => { if (!n.read) markRead(n.id); close(); }} style={{ padding: "14px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", gap: 12, cursor: "pointer", background: n.read ? "transparent" : "#F4F0F8", transition: "0.2s" }} onMouseEnter={e => e.currentTarget.style.background = n.read ? "#FAF8F6" : "#E8E0F0"} onMouseLeave={e => e.currentTarget.style.background = n.read ? "transparent" : "#F4F0F8"}>
                 <div style={{ fontSize: 22, width: 44, height: 44, borderRadius: 14, background: n.read ? "#F0ECE8" : "#E8E0F0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{n.icon}</div>
                 <div><div style={{ fontSize: 13, fontWeight: n.read ? 600 : 800, color: C.t1, marginBottom: 4 }}>{n.title}</div><div style={{ fontSize: 12, color: C.t2, lineHeight: 1.5 }}>{n.message}</div><div style={{ fontSize: 11, color: C.t3, marginTop: 6, fontWeight: 500 }}>{new Date(n.createdAt).toLocaleString('th-TH')}</div></div>
