@@ -78,6 +78,58 @@ function Toggle({ checked, onChange, label }) {
   );
 }
 
+// ─── Add Car Modal ───────────────────────────────────────────
+function AddCarModal({ onClose, onSubmit }) {
+  const [form, setForm] = useState({ name: "", licensePlate: "", type: "Sedan", color: "#059669", image: "🚗" });
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, backdropFilter: "blur(3px)", animation: "fadeIn 0.2s" }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{ background: C.card, width: 400, maxWidth: "90vw", borderRadius: 16, padding: "28px 28px 24px", animation: "scaleIn 0.2s ease", boxShadow: "0 20px 50px rgba(0,0,0,0.15)" }}>
+        <h2 style={{ fontSize: 18, fontWeight: 800, margin: "0 0 16px" }}>เพิ่มรถใหม่</h2>
+
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.t2, marginBottom: 6 }}>ชื่อรถ / รุ่น</label>
+          <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Toyota Camry" style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontFamily: font, fontSize: 13 }} />
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.t2, marginBottom: 6 }}>ทะเบียนรถ</label>
+          <input value={form.licensePlate} onChange={e => setForm({ ...form, licensePlate: e.target.value })} placeholder="กท 1234 กรุงเทพมหานคร" style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontFamily: font, fontSize: 13 }} />
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 16 }}>
+          <div>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.t2, marginBottom: 6 }}>ประเภท</label>
+            <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })} style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontFamily: font, fontSize: 13, background: "#fff", cursor: "pointer" }}>
+              <option value="Sedan">Sedan</option>
+              <option value="SUV">SUV</option>
+              <option value="Pickup">กระบะ</option>
+              <option value="Van">ตู้</option>
+            </select>
+          </div>
+          <div>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.t2, marginBottom: 6 }}>อิโมจิรถ</label>
+            <input value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} placeholder="🚗" style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontFamily: font, fontSize: 13 }} />
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.t2, marginBottom: 6 }}>สีป้าย (Hex Code)</label>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <input type="color" value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} style={{ width: 44, height: 44, padding: 0, border: "none", borderRadius: 10, cursor: "pointer", background: "transparent" }} />
+            <input value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontFamily: font, fontSize: 13 }} />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={onClose} style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 10, background: "transparent", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
+          <button onClick={() => onSubmit(form)} disabled={!form.name || !form.licensePlate} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 10, background: form.name && form.licensePlate ? C.accent : "#CBD5E1", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: font }}>เพิ่มรถคันใหม่</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── App ─────────────────────────────────────────────────────
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -88,6 +140,7 @@ export default function App() {
   const [blackoutDates, setBlackoutDates] = useState([]);
   const [page, setPage] = useState("dashboard");
   const [bookingModal, setBookingModal] = useState(null);
+  const [addCarModal, setAddCarModal] = useState(false);
   const [toast, setToast] = useState(null);
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [loginError, setLoginError] = useState("");
@@ -292,7 +345,7 @@ export default function App() {
   const handleCancel = (id) => {
     const b = bookings.find(x => x.id === id); const car = cars.find(c => c.id === b?.carId);
     setConfirm({
-      title: "ยกเลิกการจอง", message: `คุณต้องการยกเลิกการจอง ${car?.name}\\nวันที่ ${b?.startDate?.substring(0, 10)} ใช่หรือไม่?`,
+      title: "ยกเลิกการจอง", message: `คุณต้องการยกเลิกการจอง ${car?.name}\nวันที่ ${b?.startDate?.substring(0, 10)} ใช่หรือไม่?`,
       icon: "🚫", confirmLabel: "ยืนยันยกเลิก", confirmColor: C.danger,
       onConfirm: () => {
         fetch(`${API_BASE}/api/bookings/${id}/status`, {
@@ -310,6 +363,33 @@ export default function App() {
         });
       },
     });
+  };
+
+  const handleToggleCarStatus = (id, currentStatus) => {
+    const newStatus = currentStatus === "available" ? "inactive" : "available";
+    fetch(`${API_BASE}/api/cars/${id}/status`, {
+      method: "PATCH", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem('fleetbook_token')}` },
+      body: JSON.stringify({ status: newStatus })
+    }).then(res => res.json())
+      .then(updatedCar => {
+        setCars(prev => prev.map(c => c.id === id ? { ...c, status: updatedCar.status } : c));
+        showToast(updatedCar.status === "available" ? "เปิดใช้งานรถปกติแล้ว" : "ปิดการใช้งานรถแล้ว", "🚘");
+      }).catch(console.error);
+  };
+
+  const handleCreateCar = (newCarData) => {
+    fetch(`${API_BASE}/api/cars`, {
+      method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem('fleetbook_token')}` },
+      body: JSON.stringify(newCarData)
+    }).then(res => res.json())
+      .then(created => {
+        setCars(prev => [...prev, created]);
+        setAddCarModal(false);
+        showToast("เพิ่มรถคันใหม่สำเร็จ", "✨");
+      }).catch(err => {
+        console.error(err);
+        showToast("เกิดข้อผิดพลาดในการเพิ่มรถ", "❌");
+      });
   };
 
   const handleUpdateUser = (updates) => {
@@ -363,7 +443,7 @@ export default function App() {
         <div style={{ maxWidth: 1100, margin: "0 auto", padding: isMobile ? "12px 16px 80px" : "12px 36px 32px" }}>
           {page === "dashboard" && isAdmin && <Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} />}
           {page === "calendar" && <Calendar bookings={bookings} cars={cars} users={users} m={isMobile} blackouts={blackoutDates} isAdmin={isAdmin} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
-          {page === "cars" && <Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} />}
+          {page === "cars" && <Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setAddCarModal(true)} />}
           {page === "bookings" && isAdmin && <Bookings bookings={bookings} cars={cars} users={users} onApprove={handleApprove} onReject={handleReject} onCancel={handleCancel} m={isMobile} />}
           {page === "mybookings" && <MyBookings bookings={myBookings} cars={cars} onCancel={handleCancel} m={isMobile} />}
           {page === "users" && isAdmin && <UsersManage users={users} setUsers={setUsers} m={isMobile} />}
@@ -727,7 +807,7 @@ function Bookings({ bookings, cars, users, onApprove, onReject, onCancel, m }) {
 }
 
 // ─── Cars Page ───────────────────────────────────────────────
-function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser }) {
+function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onToggleCarStatus, onAddCarClick }) {
   const [filter, setFilter] = useState("all");
   const [hideUnavailable, setHideUnavailable] = useState(false);
 
@@ -751,10 +831,13 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser }) {
             {types.map(t => (<button key={t} onClick={() => setFilter(t)} style={{ padding: "6px 14px", borderRadius: 7, border: "none", background: filter === t ? C.accent : "transparent", color: filter === t ? "#fff" : C.t2, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font, whiteSpace: "nowrap" }}>{tl[t] || t}</button>))}
           </div>
           {isAdmin && (
-            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: C.t2, cursor: "pointer", background: C.card, padding: "6px 14px", borderRadius: 8, border: `1px solid ${C.border}` }}>
-              <input type="checkbox" checked={hideUnavailable} onChange={e => setHideUnavailable(e.target.checked)} style={{ cursor: "pointer", accentColor: C.accent }} />
-              ซ่อนรถที่ไม่พร้อมใช้งาน
-            </label>
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: C.t2, cursor: "pointer", background: C.card, padding: "6px 14px", borderRadius: 8, border: `1px solid ${C.border}` }}>
+                <input type="checkbox" checked={hideUnavailable} onChange={e => setHideUnavailable(e.target.checked)} style={{ cursor: "pointer", accentColor: C.accent }} />
+                ซ่อนรถที่ไม่พร้อมใช้งาน
+              </label>
+              <button onClick={onAddCarClick} style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: C.accent, color: "#fff", fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: font }}>+ เพิ่มรถใหม่</button>
+            </div>
           )}
         </div>
       </div>
@@ -777,6 +860,11 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser }) {
               <div style={{ padding: "14px 16px 16px" }}>
                 <div style={{ fontSize: 15, fontWeight: 700 }}>{car.name}</div>
                 <div style={{ display: "flex", gap: 14, margin: "6px 0 14px" }}><span style={{ fontSize: 11, color: C.t2 }}>🔖 {car.licensePlate}</span><span style={{ fontSize: 11, color: C.t2 }}>🏷️ {car.type}</span></div>
+                {isAdmin && (
+                  <button onClick={() => onToggleCarStatus(car.id, car.status)} style={{ width: "100%", padding: "7px", borderRadius: 8, border: `1px solid ${car.status === "available" ? "#FECACA" : "#A7F3D0"}`, background: car.status === "available" ? "#FEF2F2" : "#ECFDF5", color: car.status === "available" ? "#991B1B" : "#065F46", fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font, marginBottom: 8, transition: "0.2s" }}>
+                    {car.status === "available" ? "🚫 ปิดใช้งานรถคันนี้" : "✅ เปิดใช้งานปกติ"}
+                  </button>
+                )}
                 <button onClick={() => !isDisabled && onBook(car)} disabled={isDisabled} style={{ width: "100%", padding: "9px", borderRadius: 9, border: "none", fontFamily: font, background: !isDisabled ? C.accent : "#E2E8F0", color: !isDisabled ? "#fff" : C.t3, fontWeight: 700, fontSize: 12, cursor: !isDisabled ? "pointer" : "not-allowed" }}>{!avail ? "ไม่พร้อมใช้งาน" : active ? "ถูกจองแล้ว" : hasActiveBooking ? "จำกัด 1 คัน/คน" : "จองรถคันนี้"}</button>
               </div>
             </div>

@@ -22,4 +22,41 @@ const getCarById = async (req, res) => {
     }
 };
 
-module.exports = { getCars, getCarById };
+const updateCarStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        if (!['available', 'booked', 'maintenance', 'inactive'].includes(status)) {
+            return res.status(400).json({ error: "Invalid status" });
+        }
+
+        const updatedCar = await prisma.car.update({
+            where: { id: parseInt(id) },
+            data: { status }
+        });
+
+        res.json(updatedCar);
+    } catch (error) {
+        console.error("Error updating car status:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+const createCar = async (req, res) => {
+    try {
+        const { name, licensePlate, type, color, image } = req.body;
+        if (!name || !licensePlate || !type || !color || !image) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+        const newCar = await prisma.car.create({
+            data: { name, licensePlate, type, color, status: 'available', image }
+        });
+        res.status(201).json(newCar);
+    } catch (error) {
+        console.error("Error creating car:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { getCars, getCarById, updateCarStatus, createCar };
