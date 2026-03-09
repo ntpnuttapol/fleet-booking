@@ -137,6 +137,7 @@ export default function App() {
   const [cars, setCars] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [users, setUsers] = useState([]);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [blackoutDates, setBlackoutDates] = useState([]);
   const [page, setPage] = useState("dashboard");
@@ -184,6 +185,7 @@ export default function App() {
   // Initial Resource Load
   useEffect(() => {
     if (!currentUser) return; // Only fetch data when logged in
+    setDataLoaded(false);
     const token = localStorage.getItem('fleetbook_token');
     const headers = token ? { "Authorization": `Bearer ${token}` } : {};
     Promise.all([
@@ -194,7 +196,11 @@ export default function App() {
       setCars(Array.isArray(carsData) ? carsData : []);
       setUsers(Array.isArray(usersData) ? usersData : []);
       setBookings(Array.isArray(bookingsData) ? bookingsData : []);
-    }).catch(console.error);
+      setDataLoaded(true);
+    }).catch(err => {
+      console.error(err);
+      setDataLoaded(true); // Ensure it unblocks even on error
+    });
   }, [currentUser]);
 
   // Auto Logout on Idle (15 minutes)
@@ -297,9 +303,9 @@ export default function App() {
           setLoginError("");
           setTimeout(() => {
             setCurrentUser(data.user);
-            setPage(data.user.role === "admin" ? "dashboard" : "cars");
+            setPage(data.user.role === "admin" ? "dashboard"กฟก : "cars");
             setLoginSuccess(false);
-          }, 1500);
+          }, 400);
         })
         .catch(err => setLoginError(typeof err === 'string' ? err : err?.message || err?.error || "Connection error"));
     }} />;
@@ -446,14 +452,21 @@ export default function App() {
 
       <div style={{ flex: 1, overflowX: "hidden", overflowY: "auto", minWidth: 0 }}>
         <div style={{ width: "100%", maxWidth: 1100, margin: "0 auto", padding: isMobile ? "24px 16px 80px" : "32px 36px 40px" }}>
-          {page === "dashboard" && isAdmin && <Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} />}
-          {page === "calendar" && <Calendar bookings={bookings} cars={cars} users={users} m={isMobile} blackouts={blackoutDates} isAdmin={isAdmin} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
-          {page === "cars" && <Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setCarFormModal({})} onEditCarClick={c => setCarFormModal(c)} />}
-          {page === "bookings" && isAdmin && <Bookings bookings={bookings} cars={cars} users={users} onApprove={handleApprove} onReject={handleReject} onCancel={handleCancel} m={isMobile} />}
-          {page === "mybookings" && <MyBookings bookings={myBookings} cars={cars} onCancel={handleCancel} m={isMobile} />}
-          {page === "users" && isAdmin && <UsersManage users={users} setUsers={setUsers} m={isMobile} />}
-          {page === "reports" && isAdmin && <Reports bookings={bookings} cars={cars} users={users} m={isMobile} />}
-          {page === "settings" && <Settings currentUser={currentUser} onUpdate={handleUpdateUser} onChangePassword={handleChangePassword} m={isMobile} isAdmin={isAdmin} blackouts={blackoutDates} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
+          {!dataLoaded ? (
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '60vh', color: C.t3, animation: "fadeIn 0.3s" }}>
+              <div style={{ width: 40, height: 40, border: `4px solid ${C.border}`, borderTopColor: C.accent, borderRadius: "50%", animation: "spin 1s linear infinite", marginBottom: 16 }} />
+              <div style={{ fontSize: 15, fontWeight: 600 }}>กำลังอัปเดตข้อมูล...</div>
+            </div>
+          ) : (<>
+            {page === "dashboard" && isAdmin && <Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} />}
+            {page === "calendar" && <Calendar bookings={bookings} cars={cars} users={users} m={isMobile} blackouts={blackoutDates} isAdmin={isAdmin} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
+            {page === "cars" && <Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setCarFormModal({})} onEditCarClick={c => setCarFormModal(c)} />}
+            {page === "bookings" && isAdmin && <Bookings bookings={bookings} cars={cars} users={users} onApprove={handleApprove} onReject={handleReject} onCancel={handleCancel} m={isMobile} />}
+            {page === "mybookings" && <MyBookings bookings={myBookings} cars={cars} onCancel={handleCancel} m={isMobile} />}
+            {page === "users" && isAdmin && <UsersManage users={users} setUsers={setUsers} m={isMobile} />}
+            {page === "reports" && isAdmin && <Reports bookings={bookings} cars={cars} users={users} m={isMobile} />}
+            {page === "settings" && <Settings currentUser={currentUser} onUpdate={handleUpdateUser} onChangePassword={handleChangePassword} m={isMobile} isAdmin={isAdmin} blackouts={blackoutDates} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
+          </>)}
         </div>
         {carFormModal && <CarFormModal initialData={Object.keys(carFormModal).length > 0 ? carFormModal : null} onClose={() => setCarFormModal(null)} onSubmit={handleSaveCar} />}
         {bookingModal && <BookingModal car={bookingModal} onClose={() => setBookingModal(null)} onSubmit={handleBook} m={isMobile} blackouts={blackoutDates} />}
@@ -467,6 +480,7 @@ export default function App() {
         @keyframes slideUpFade{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         @keyframes float{0%{transform:translateY(0px)}50%{transform:translateY(-12px)}100%{transform:translateY(0px)}}
         @keyframes slideRight{from{transform:translateX(-100%)}to{transform:translateX(0)}}
         @keyframes bellShake{0%{transform:rotate(0)}15%{transform:rotate(12deg)}30%{transform:rotate(-10deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(3deg)}100%{transform:rotate(0)}}
