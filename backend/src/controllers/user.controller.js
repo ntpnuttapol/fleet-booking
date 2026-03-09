@@ -1,12 +1,14 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const { generateToken } = require('../middleware/auth.middleware');
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+    log: ['query', 'info', 'warn', 'error'],
+});
 
 const getUsers = async (req, res) => {
     try {
         const users = await prisma.user.findMany({
-            select: { id: true, name: true, email: true, department: true, role: true, avatar: true }
+            select: { id: true, name: true, username: true, email: true, department: true, role: true, avatar: true }
         });
         res.json(users);
     } catch (error) {
@@ -17,12 +19,20 @@ const getUsers = async (req, res) => {
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const user = await prisma.user.findUnique({
-            where: { email }
+        // The frontend currently sends 'email' field, it could contain either email or username
+        const identifier = email || "";
+
+        const user = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: identifier },
+                    { username: identifier }
+                ]
+            }
         });
 
         if (!user) {
-            return res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+            return res.status(401).json({ error: "ชื่อผู้ใช้, อีเมล หรือรหัสผ่านไม่ถูกต้อง" });
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -45,7 +55,7 @@ const getMe = async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: { id: req.user.id },
-            select: { id: true, name: true, email: true, department: true, role: true, avatar: true }
+            select: { id: true, name: true, username: true, email: true, department: true, role: true, avatar: true }
         });
         if (!user) return res.status(404).json({ error: "User not found" });
         res.json(user);
@@ -60,32 +70,43 @@ const createUser = async (req, res) => {
             return res.status(403).json({ error: "ไม่มีสิทธิ์ใช้งานส่วนนี้ (เฉพาะ Admin เท่านั้น)" });
         }
 
-        const { name, email, password, department, role } = req.body;
+        const { name, username, email, password, department, role } = req.body;
 
-        if (!name || !email || !password) {
+        if (!name || (!email && !username) || !password) {
             return res.status(400).json({ error: "กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน" });
         }
 
-        const existingUser = await prisma.user.findUnique({
-            where: { email }
+        const identifier = email || username;
+
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: identifier },
+                    { username: identifier }
+                ]
+            }
         });
 
         if (existingUser) {
-            return res.status(400).json({ error: "อีเมลนี้ถูกใช้งานแล้ว" });
+            return res.status(400).json({ error: "ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้งานแล้ว" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // If username not provided, fall back to email split
+        const finalUsername = username || (email ? email.split('@')[0] : `user_${Date.now()}`);
+
         const newUser = await prisma.user.create({
             data: {
                 name,
-                email,
+                username: finalUsername,
+                email: email || null,
                 password: hashedPassword,
                 department,
                 role: role || 'user',
                 avatar: "👤" // Default avatar
             },
-            select: { id: true, name: true, email: true, department: true, role: true, avatar: true }
+            select: { id: true, name: true, username: true, email: true, department: true, role: true, avatar: true }
         });
 
         res.status(201).json(newUser);

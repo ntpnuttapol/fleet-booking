@@ -547,7 +547,7 @@ function LoginPage({ form, setForm, error, onLogin, isMobile }) {
       <div style={{ width: "100%", maxWidth: 380, padding: isMobile ? "36px 24px" : "44px 36px", background: "#FFFFFF", border: `1px solid ${C.border}`, borderRadius: 24, boxShadow: "0 10px 40px rgba(0,0,0,0.04)", animation: "scaleIn 0.4s" }}>
         <div style={{ textAlign: "center", marginBottom: 32 }}><img src="/logo.png" alt="logo" style={{ height: 60, objectFit: "contain", marginBottom: 12 }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} /><div style={{ fontSize: 44, marginBottom: 10, display: "none" }}>🏢</div><div style={{ fontSize: 24, fontWeight: 800, color: C.t1 }}>Polyfoam</div><div style={{ fontSize: 13, color: C.t2, marginTop: 5, fontWeight: 500 }}>ระบบจองรถบริษัท</div></div>
         {error && <div style={{ background: "rgba(255,59,48,0.1)", border: "1px solid rgba(255,59,48,0.2)", borderRadius: 12, padding: "10px 14px", marginBottom: 16, color: C.danger, fontSize: 13, fontWeight: 500 }}>{error}</div>}
-        <div style={{ marginBottom: 14 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล</label><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
+        <div style={{ marginBottom: 14 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล หรือ ชื่อผู้ใช้งาน</label><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com หรือ somchai_admin" style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
         <div style={{ marginBottom: 24 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>รหัสผ่าน</label><input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••" onKeyDown={e => e.key === "Enter" && onLogin()} style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
         <button onClick={onLogin} style={{ width: "100%", padding: "12px", background: C.t1, color: "#fff", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: font }}>เข้าสู่ระบบ</button>
       </div>
@@ -761,13 +761,15 @@ function MyBookings({ bookings, cars, onCancel, m }) {
           {bookings.map(b => {
             const car = cars.find(c => c.id === b.carId);
             const canCancel = b.status === "pending" || b.status === "approved";
+            const startStr = b.startDate ? b.startDate.substring(0, 10) : "";
+            const endStr = b.endDate ? b.endDate.substring(0, 10) : "";
             return (
               <div key={b.id} style={{ background: C.card, borderRadius: 12, padding: m ? "14px 16px" : "16px 20px", border: `1px solid ${C.border}`, display: "flex", flexDirection: m ? "column" : "row", gap: m ? 10 : 12, alignItems: m ? "flex-start" : "center" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
                   <span style={{ fontSize: 30 }}>{car?.image}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}><span style={{ fontWeight: 700, fontSize: 14, color: C.t1 }}>{car?.name}</span><Badge status={b.status} /></div>
-                    <div style={{ fontSize: 11, color: C.t2 }}>📅 {b.startDate?.substring(0, 10)}{b.startDate?.substring(0, 10) !== b.endDate?.substring(0, 10) ? ` → ${b.endDate?.substring(0, 10)}` : ""} · 📝 {b.purpose}</div>
+                    <div style={{ fontSize: 11, color: C.t2 }}>📅 {startStr}{startStr !== endStr && endStr ? ` → ${endStr}` : ""} · 📝 {b.purpose}</div>
                   </div>
                 </div>
                 {canCancel && <button onClick={() => onCancel(b.id)} style={{ padding: "7px 16px", borderRadius: 8, border: `1px solid ${C.border}`, background: "#fff", color: C.danger, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font, ...(m ? { width: "100%" } : {}) }}>ยกเลิกการจอง</button>}
@@ -948,7 +950,7 @@ function UsersManage({ users, setUsers, m }) {
       <div style={{ background: C.card, borderRadius: 14, padding: m ? 12 : 20, border: `1px solid ${C.border}`, overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 500 }}>
-            <thead><tr style={{ borderBottom: `2px solid ${C.border}` }}>{["ชื่อ-นามสกุล", "อีเมล", "แผนก", "สิทธิ์"].map(h => <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: C.t2, fontWeight: 600, fontSize: 11 }}>{h}</th>)}</tr></thead>
+            <thead><tr style={{ borderBottom: `2px solid ${C.border}` }}>{["ชื่อ-นามสกุล", "อีเมล / ชื่อผู้ใช้", "แผนก", "สิทธิ์"].map(h => <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: C.t2, fontWeight: 600, fontSize: 11 }}>{h}</th>)}</tr></thead>
             <tbody>{users.map(u => (
               <tr key={u.id} style={{ borderBottom: `1px solid ${C.border}` }}>
                 <td style={{ padding: "12px" }}>
@@ -957,7 +959,10 @@ function UsersManage({ users, setUsers, m }) {
                     <span style={{ fontWeight: 600 }}>{u.name}</span>
                   </div>
                 </td>
-                <td style={{ padding: "12px", color: C.t2 }}>{u.email}</td>
+                <td style={{ padding: "12px", color: C.t2 }}>
+                  <div>{u.email || "-"}</div>
+                  {u.username && <div style={{ fontSize: 10, color: C.t3, marginTop: 2 }}>👤 {u.username}</div>}
+                </td>
                 <td style={{ padding: "12px", color: C.t2 }}>{u.department || "-"}</td>
                 <td style={{ padding: "12px" }}><span style={{ background: u.role === "admin" ? C.t1 : "#F5F5F7", color: u.role === "admin" ? "#fff" : C.t2, padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, border: u.role !== "admin" ? `1px solid ${C.border}` : "none" }}>{u.role === "admin" ? "Admin" : "User"}</span></td>
               </tr>
@@ -974,7 +979,7 @@ function UsersManage({ users, setUsers, m }) {
 
 // ─── Add User Modal ──────────────────────────────────────────
 function AddUserModal({ onClose, onSubmit, m }) {
-  const [f, setF] = useState({ name: "", email: "", password: "", department: "", role: "user" });
+  const [f, setF] = useState({ name: "", username: "", email: "", password: "", department: "", role: "user" });
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: m ? "flex-end" : "center", justifyContent: "center", zIndex: 300, animation: "fadeIn 0.2s", backdropFilter: "blur(4px)" }} onClick={onClose}>
@@ -983,7 +988,8 @@ function AddUserModal({ onClose, onSubmit, m }) {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
           <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>ชื่อ-นามสกุล <span style={{ color: C.danger }}>*</span></label><input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder="ชื่อ นามสกุล" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล <span style={{ color: C.danger }}>*</span></label><input type="email" value={f.email} onChange={e => setF({ ...f, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>ชื่อผู้ใช้งาน (Username) <span style={{ color: C.danger }}>*</span></label><input value={f.username} onChange={e => setF({ ...f, username: e.target.value })} placeholder="somchai_admin" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล (ไม่บังคับ)</label><input type="email" value={f.email} onChange={e => setF({ ...f, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
           <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>รหัสผ่าน <span style={{ color: C.danger }}>*</span></label><input type="password" value={f.password} onChange={e => setF({ ...f, password: e.target.value })} placeholder="••••••••" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
           <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>แผนก</label><input value={f.department} onChange={e => setF({ ...f, department: e.target.value })} placeholder="เช่น IT, HR, Sales" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
           <div>
@@ -997,7 +1003,7 @@ function AddUserModal({ onClose, onSubmit, m }) {
 
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} style={{ flex: 1, padding: "12px", border: `1px solid ${C.border}`, borderRadius: 10, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
-          <button onClick={() => { if (f.name && f.email && f.password) onSubmit(f); }} disabled={!f.name || !f.email || !f.password} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 10, fontFamily: font, background: f.name && f.email && f.password ? C.t1 : "#E5E5EA", color: f.name && f.email && f.password ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.name && f.email && f.password ? "pointer" : "not-allowed" }}>ยืนยันเพิ่มผู้ใช้งาน</button>
+          <button onClick={() => { if (f.name && (f.email || f.username) && f.password) onSubmit(f); }} disabled={!f.name || (!f.email && !f.username) || !f.password} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 10, fontFamily: font, background: f.name && (f.email || f.username) && f.password ? C.t1 : "#E5E5EA", color: f.name && (f.email || f.username) && f.password ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.name && (f.email || f.username) && f.password ? "pointer" : "not-allowed" }}>ยืนยันเพิ่มผู้ใช้งาน</button>
         </div>
       </div>
     </div>
