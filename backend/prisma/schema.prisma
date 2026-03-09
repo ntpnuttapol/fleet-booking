@@ -9,73 +9,70 @@ datasource db {
 }
 
 model User {
-  id              Int                        @id @default(autoincrement())
-  email           String                     @unique
-  password        String
-  name            String
-  avatar          String?
-  department      String?
-  role            String                     @default("user") // user, admin
-  createdAt       DateTime                   @default(now())
-  updatedAt       DateTime                   @updatedAt
-
-  bookings        Booking[]
-  notifications   Notification[]
+  id               Int                     @id @default(autoincrement())
+  email            String                  @unique
+  password         String
+  name             String
+  avatar           String?
+  department       String?
+  role             String                  @default("user")
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  bookings         Booking[]
+  notifications    Notification[]
   notificationPref NotificationPreference?
 }
 
 model Car {
-  id              Int       @id @default(autoincrement())
-  name            String
-  licensePlate    String
-  type            String    // Sedan, SUV, Pickup, Van
-  color           String    // Hex code
-  status          String    @default("available") // available, booked, maintenance
-  image           String    // Emoji or URL
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  bookings        Booking[]
+  id           Int       @id @default(autoincrement())
+  name         String
+  licensePlate String
+  type         String
+  color        String
+  status       String    @default("available")
+  image        String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  bookings     Booking[]
 }
 
 model Booking {
-  id              Int            @id @default(autoincrement())
-  userId          Int
-  user            User           @relation(fields: [userId], references: [id])
-  carId           Int
-  car             Car            @relation(fields: [carId], references: [id])
-  startDate       String         // Storing as string ISO for simplicity
-  endDate         String
-  purpose         String
-  status          String         @default("pending") // pending, approved, rejected, completed
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-
-  notifications   Notification[]
+  id            Int            @id @default(autoincrement())
+  userId        Int
+  carId         Int
+  startDate     String
+  endDate       String
+  purpose       String
+  status        String         @default("pending")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  car           Car            @relation(fields: [carId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  notifications Notification[]
 }
 
 model Notification {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  user        User     @relation(fields: [userId], references: [id])
-  type        String   // 'new_booking', 'booking_approved', 'booking_rejected'
-  title       String
-  message     String
-  bookingId   Int?
-  booking     Booking? @relation(fields: [bookingId], references: [id])
-  channels    String   @default("inapp")
-  read        Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  type      String
+  title     String
+  message   String
+  bookingId Int?
+  channels  String   @default("inapp")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
   @@index([userId, read])
 }
 
 model NotificationPreference {
-  userId      Int      @id
-  user        User     @relation(fields: [userId], references: [id])
-  inapp       Boolean  @default(true)
-  email       Boolean  @default(true)
-  line        Boolean  @default(false)
-  lineToken   String?
-  updatedAt   DateTime @default(now()) @updatedAt
+  userId    Int      @id
+  inapp     Boolean  @default(true)
+  email     Boolean  @default(true)
+  line      Boolean  @default(false)
+  lineToken String?
+  updatedAt DateTime @default(now()) @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 }
