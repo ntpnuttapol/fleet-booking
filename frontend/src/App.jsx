@@ -295,7 +295,7 @@ export default function App() {
           setPage(data.user.role === "admin" ? "dashboard" : "cars");
           setLoginError("");
         })
-        .catch(err => setLoginError(err));
+        .catch(err => setLoginError(typeof err === 'string' ? err : err?.message || err?.error || "เกิดข้อผิดพลาดในการเชื่อมต่อ"));
     }} />;
   }
 
