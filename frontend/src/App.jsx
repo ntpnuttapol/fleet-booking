@@ -45,7 +45,7 @@ function useWindowWidth() {
 }
 
 const font = `'Noto Sans Thai', 'DM Sans', system-ui, sans-serif`;
-const C = { bg: "#F8FAFC", card: "#FFFFFF", sidebar: "#064E3B", accent: "#059669", accentLight: "#D1FAE5", border: "#E2E8F0", t1: "#0F172A", t2: "#64748B", t3: "#94A3B8", danger: "#EF4444", success: "#10B981", warn: "#F59E0B" };
+const C = { bg: "#F5F5F7", card: "#FFFFFF", sidebar: "#FFFFFF", accent: "#000000", accentLight: "#E5E5E5", border: "#E5E5EA", t1: "#1D1D1F", t2: "#86868B", t3: "#AEAEB2", danger: "#FF3B30", success: "#34C759", warn: "#FF9500" };
 
 // ─── Confirm Dialog ──────────────────────────────────────────
 function ConfirmDialog({ title, message, confirmLabel, confirmColor, onConfirm, onCancel, icon }) {
@@ -117,13 +117,13 @@ function AddCarModal({ onClose, onSubmit }) {
           <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: C.t2, marginBottom: 6 }}>สีป้าย (Hex Code)</label>
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <input type="color" value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} style={{ width: 44, height: 44, padding: 0, border: "none", borderRadius: 10, cursor: "pointer", background: "transparent" }} />
-            <input value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontFamily: font, fontSize: 13 }} />
+            <input value={form.color} onChange={e => setForm({ ...form, color: e.target.value })} style={{ flex: 1, padding: "10px 14px", borderRadius: 10, border: `1px solid ${C.border}`, fontFamily: font, fontSize: 13, background: "#F5F5F7", color: C.t1 }} />
           </div>
         </div>
 
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 10, background: "transparent", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
-          <button onClick={() => onSubmit(form)} disabled={!form.name || !form.licensePlate} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 10, background: form.name && form.licensePlate ? C.accent : "#CBD5E1", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: font }}>เพิ่มรถคันใหม่</button>
+          <button onClick={onClose} style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 10, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
+          <button onClick={() => onSubmit(form)} disabled={!form.name || !form.licensePlate} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 10, background: form.name && form.licensePlate ? C.t1 : "#E5E5EA", color: form.name && form.licensePlate ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: form.name && form.licensePlate ? "pointer" : "not-allowed", fontFamily: font }}>เพิ่มรถคันใหม่</button>
         </div>
       </div>
     </div>
@@ -426,13 +426,13 @@ export default function App() {
 
   return (
     <div style={{ fontFamily: font, display: "flex", height: "100vh", background: C.bg, color: C.t1, overflow: "hidden" }}>
-      {!isMobile && <div style={{ width: 220, background: C.sidebar, color: "#fff", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+      {!isMobile && <div style={{ width: 220, background: C.sidebar, color: C.t1, display: "flex", flexDirection: "column", flexShrink: 0, borderRight: `1px solid ${C.border}` }}>
         <Sidebar navItems={navItems} page={page} onNav={nav} user={currentUser} bookings={bookings} isAdmin={isAdmin} onLogout={() => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); }} />
       </div>}
 
       {isMobile && mobileMenu && <div style={{ position: "fixed", inset: 0, zIndex: 200, animation: "fadeIn 0.15s" }}>
         <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)" }} onClick={() => setMobileMenu(false)} />
-        <div style={{ position: "relative", width: 260, height: "100%", background: C.sidebar, color: "#fff", animation: "slideRight 0.2s", display: "flex", flexDirection: "column" }}>
+        <div style={{ position: "relative", width: 260, height: "100%", background: C.sidebar, color: C.t1, animation: "slideRight 0.2s", display: "flex", flexDirection: "column" }}>
           <Sidebar navItems={navItems} page={page} onNav={nav} user={currentUser} bookings={bookings} isAdmin={isAdmin} onLogout={() => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setMobileMenu(false); }} />
         </div>
       </div>}
@@ -452,7 +452,7 @@ export default function App() {
         </div>
         {bookingModal && <BookingModal car={bookingModal} onClose={() => setBookingModal(null)} onSubmit={handleBook} m={isMobile} blackouts={blackoutDates} />}
         {confirm && <ConfirmDialog {...confirm} onCancel={() => setConfirm(null)} />}
-        {toast && <div style={{ position: "fixed", bottom: isMobile ? 16 : 28, left: isMobile ? 16 : "auto", right: isMobile ? 16 : 28, background: C.sidebar, color: "#fff", padding: "12px 20px", borderRadius: 12, fontSize: 13, fontWeight: 500, fontFamily: font, boxShadow: "0 8px 30px rgba(0,0,0,0.2)", animation: "slideUp 0.3s", zIndex: 999, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>{toast.icon}</span> {toast.msg}</div>}
+        {toast && <div style={{ position: "fixed", bottom: isMobile ? 16 : 28, left: isMobile ? 16 : "auto", right: isMobile ? 16 : 28, background: C.t1, color: "#fff", padding: "12px 20px", borderRadius: 12, fontSize: 13, fontWeight: 500, fontFamily: font, boxShadow: "0 8px 30px rgba(0,0,0,0.2)", animation: "slideUp 0.3s", zIndex: 999, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>{toast.icon}</span> {toast.msg}</div>}
       </div>
 
       <style>{`
@@ -475,21 +475,21 @@ export default function App() {
 // ─── Sidebar ─────────────────────────────────────────────────
 function Sidebar({ navItems, page, onNav, user, bookings, isAdmin, onLogout }) {
   return (<>
-    <div style={{ padding: "24px 20px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-      <div style={{ fontSize: 18, fontWeight: 800, display: "flex", alignItems: "center", gap: 10 }}><img src="/logo.png" alt="logo" style={{ height: 26, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'inline-block'; }} /><span style={{ fontSize: 22, display: "none" }}>🏢</span> Polyfoam</div>
+    <div style={{ padding: "24px 20px 16px", borderBottom: `1px solid ${C.border}` }}>
+      <div style={{ fontSize: 18, fontWeight: 800, display: "flex", alignItems: "center", gap: 10, color: C.t1 }}><img src="/logo.png" alt="logo" style={{ height: 26, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'inline-block'; }} /><span style={{ fontSize: 22, display: "none" }}>🏢</span> Polyfoam</div>
       <div style={{ fontSize: 10, color: C.t3, marginTop: 3, letterSpacing: 1, textTransform: "uppercase" }}>ระบบจองรถบริษัท</div>
     </div>
     <nav style={{ flex: 1, padding: "12px 10px" }}>
       {navItems.map(n => (
-        <button key={n.key} onClick={() => onNav(n.key)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 14px", marginBottom: 3, border: "none", borderRadius: 9, background: page === n.key ? "rgba(255,255,255,0.1)" : "transparent", color: page === n.key ? "#fff" : C.t3, cursor: "pointer", fontSize: 13, fontWeight: page === n.key ? 600 : 400, fontFamily: font, transition: "all 0.15s" }}>
+        <button key={n.key} onClick={() => onNav(n.key)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 14px", marginBottom: 3, border: "none", borderRadius: 9, background: page === n.key ? "#F5F5F7" : "transparent", color: page === n.key ? C.accent : C.t2, cursor: "pointer", fontSize: 13, fontWeight: page === n.key ? 600 : 500, fontFamily: font, transition: "all 0.15s" }} onMouseEnter={e => page !== n.key && (e.currentTarget.style.background = "#F9FAFB")} onMouseLeave={e => page !== n.key && (e.currentTarget.style.background = "transparent")}>
           <span style={{ fontSize: 16 }}>{n.icon}</span> {n.label}
           {n.key === "bookings" && isAdmin && bookings.filter(b => b.status === "pending").length > 0 && <span style={{ marginLeft: "auto", background: C.danger, color: "#fff", fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 10 }}>{bookings.filter(b => b.status === "pending").length}</span>}
         </button>
       ))}
     </nav>
-    <div style={{ padding: "12px 10px", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 10px" }}><span style={{ fontSize: 24 }}>{user.avatar}</span><div><div style={{ fontSize: 12, fontWeight: 600 }}>{user.name}</div><div style={{ fontSize: 10, color: C.t3 }}>{user.department}</div></div></div>
-      <button onClick={onLogout} style={{ width: "100%", marginTop: 8, padding: "7px", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 8, background: "transparent", color: C.t3, cursor: "pointer", fontSize: 11, fontFamily: font }}>ออกจากระบบ</button>
+    <div style={{ padding: "12px 10px", borderTop: `1px solid ${C.border}` }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 10px" }}><span style={{ fontSize: 24 }}>{user.avatar}</span><div><div style={{ fontSize: 12, fontWeight: 600, color: C.t1 }}>{user.name}</div><div style={{ fontSize: 10, color: C.t3 }}>{user.department}</div></div></div>
+      <button onClick={onLogout} style={{ width: "100%", marginTop: 8, padding: "7px", border: `1px solid ${C.border}`, borderRadius: 8, background: "transparent", color: C.danger, cursor: "pointer", fontSize: 11, fontFamily: font, fontWeight: 600, transition: "0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "#FEF2F2"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>ออกจากระบบ</button>
     </div>
   </>);
 }
@@ -532,13 +532,13 @@ function TopBar({ unread, showPanel, toggle, notifs, markRead, markAllRead, clos
 // ─── Login ───────────────────────────────────────────────────
 function LoginPage({ form, setForm, error, onLogin, isMobile }) {
   return (
-    <div style={{ fontFamily: font, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,#064E3B,#047857,#064E3B)", padding: 16 }}>
-      <div style={{ width: "100%", maxWidth: 380, padding: isMobile ? "36px 24px" : "44px 36px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 18, backdropFilter: "blur(20px)", animation: "scaleIn 0.4s" }}>
-        <div style={{ textAlign: "center", marginBottom: 32 }}><img src="/logo.png" alt="logo" style={{ height: 60, objectFit: "contain", marginBottom: 12 }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} /><div style={{ fontSize: 44, marginBottom: 10, display: "none" }}>🏢</div><div style={{ fontSize: 24, fontWeight: 800, color: "#fff" }}>Polyfoam</div><div style={{ fontSize: 12, color: C.t3, marginTop: 5 }}>ระบบจองรถบริษัท</div></div>
-        {error && <div style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, padding: "8px 12px", marginBottom: 14, color: "#FCA5A5", fontSize: 12 }}>{error}</div>}
-        <div style={{ marginBottom: 14 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t3, marginBottom: 5 }}>อีเมล</label><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "10px 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#fff", fontSize: 13, fontFamily: font }} /></div>
-        <div style={{ marginBottom: 24 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t3, marginBottom: 5 }}>รหัสผ่าน</label><input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••" onKeyDown={e => e.key === "Enter" && onLogin()} style={{ width: "100%", padding: "10px 14px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#fff", fontSize: 13, fontFamily: font }} /></div>
-        <button onClick={onLogin} style={{ width: "100%", padding: "12px", background: C.accent, color: "#fff", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: font }}>เข้าสู่ระบบ</button>
+    <div style={{ fontFamily: font, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#F5F5F7", padding: 16 }}>
+      <div style={{ width: "100%", maxWidth: 380, padding: isMobile ? "36px 24px" : "44px 36px", background: "#FFFFFF", border: `1px solid ${C.border}`, borderRadius: 24, boxShadow: "0 10px 40px rgba(0,0,0,0.04)", animation: "scaleIn 0.4s" }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}><img src="/logo.png" alt="logo" style={{ height: 60, objectFit: "contain", marginBottom: 12 }} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} /><div style={{ fontSize: 44, marginBottom: 10, display: "none" }}>🏢</div><div style={{ fontSize: 24, fontWeight: 800, color: C.t1 }}>Polyfoam</div><div style={{ fontSize: 13, color: C.t2, marginTop: 5, fontWeight: 500 }}>ระบบจองรถบริษัท</div></div>
+        {error && <div style={{ background: "rgba(255,59,48,0.1)", border: "1px solid rgba(255,59,48,0.2)", borderRadius: 12, padding: "10px 14px", marginBottom: 16, color: C.danger, fontSize: 13, fontWeight: 500 }}>{error}</div>}
+        <div style={{ marginBottom: 14 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล</label><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
+        <div style={{ marginBottom: 24 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>รหัสผ่าน</label><input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••" onKeyDown={e => e.key === "Enter" && onLogin()} style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
+        <button onClick={onLogin} style={{ width: "100%", padding: "12px", background: C.t1, color: "#fff", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: font }}>เข้าสู่ระบบ</button>
       </div>
     </div>
   );
@@ -728,9 +728,9 @@ function Calendar({ bookings, cars, users, m, blackouts, isAdmin, onAddBlackout,
           {dayBks.map(b => {
             const car = cars.find(c => c.id === b.carId); const u = users.find(x => x.id === b.userId);
             return (
-              <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 10, background: `${car?.color}06`, border: `1px solid ${car?.color}15`, marginBottom: 8 }}>
+              <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 10, background: "#F5F5F7", border: `1px solid ${C.border}`, marginBottom: 8 }}>
                 <span style={{ fontSize: 22 }}>{car?.image}</span>
-                <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>{car?.name} <Badge status={b.status} /></div><div style={{ fontSize: 11, color: C.t2, marginTop: 2 }}>{u?.avatar} {u?.name} · {b.purpose}</div></div>
+                <div style={{ flex: 1 }}><div style={{ fontSize: 13, fontWeight: 700, display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", color: C.t1 }}>{car?.name} <Badge status={b.status} /></div><div style={{ fontSize: 11, color: C.t2, marginTop: 2 }}>{u?.avatar} {u?.name} · {b.purpose}</div></div>
               </div>
             );
           })}
@@ -755,11 +755,11 @@ function MyBookings({ bookings, cars, onCancel, m }) {
                 <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
                   <span style={{ fontSize: 30 }}>{car?.image}</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}><span style={{ fontWeight: 700, fontSize: 14 }}>{car?.name}</span><Badge status={b.status} /></div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}><span style={{ fontWeight: 700, fontSize: 14, color: C.t1 }}>{car?.name}</span><Badge status={b.status} /></div>
                     <div style={{ fontSize: 11, color: C.t2 }}>📅 {b.startDate?.substring(0, 10)}{b.startDate?.substring(0, 10) !== b.endDate?.substring(0, 10) ? ` → ${b.endDate?.substring(0, 10)}` : ""} · 📝 {b.purpose}</div>
                   </div>
                 </div>
-                {canCancel && <button onClick={() => onCancel(b.id)} style={{ padding: "7px 16px", borderRadius: 8, border: `1px solid #FECACA`, background: "#FEF2F2", color: "#991B1B", fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font, ...(m ? { width: "100%" } : {}) }}>🚫 ยกเลิก</button>}
+                {canCancel && <button onClick={() => onCancel(b.id)} style={{ padding: "7px 16px", borderRadius: 8, border: `1px solid ${C.border}`, background: "#fff", color: C.danger, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font, ...(m ? { width: "100%" } : {}) }}>ยกเลิกการจอง</button>}
               </div>
             );
           })}
@@ -793,10 +793,10 @@ function Bookings({ bookings, cars, users, onApprove, onReject, onCancel, m }) {
               </div>
               <div style={{ display: "flex", gap: 6, flexShrink: 0, flexWrap: "wrap", ...(m ? { width: "100%" } : {}) }}>
                 {b.status === "pending" && <>
-                  <button onClick={() => onApprove(b.id)} style={{ flex: m ? 1 : "none", padding: "7px 16px", borderRadius: 7, border: "none", background: "#10B981", color: "#fff", fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font }}>✅ อนุมัติ</button>
-                  <button onClick={() => onReject(b.id)} style={{ flex: m ? 1 : "none", padding: "7px 16px", borderRadius: 7, border: `1px solid ${C.border}`, background: "transparent", color: C.t2, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font }}>❌ ปฏิเสธ</button>
+                  <button onClick={() => onApprove(b.id)} style={{ flex: m ? 1 : "none", padding: "7px 16px", borderRadius: 7, border: "none", background: C.t1, color: "#fff", fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font }}>อนุมัติ</button>
+                  <button onClick={() => onReject(b.id)} style={{ flex: m ? 1 : "none", padding: "7px 16px", borderRadius: 7, border: `1px solid ${C.border}`, background: "transparent", color: C.t2, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font }}>ปฏิเสธ</button>
                 </>}
-                {canCancel && <button onClick={() => onCancel(b.id)} style={{ flex: m ? 1 : "none", padding: "7px 16px", borderRadius: 7, border: "1px solid #FECACA", background: "#FEF2F2", color: "#991B1B", fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font }}>🚫 ยกเลิก</button>}
+                {canCancel && <button onClick={() => onCancel(b.id)} style={{ flex: m ? 1 : "none", padding: "7px 16px", borderRadius: 7, border: `1px solid ${C.border}`, background: "#fff", color: C.danger, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>}
               </div>
             </div>
           );
@@ -828,15 +828,15 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
         <div><h1 style={{ fontSize: m ? 20 : 26, fontWeight: 800, margin: 0 }}>{isAdmin ? "จัดการรถ" : "จองรถ"}</h1><p style={{ color: C.t2, fontSize: 13, margin: "4px 0 0" }}>{isAdmin ? "รายการรถทั้งหมด" : "เลือกรถที่ต้องการจอง"}</p></div>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <div style={{ display: "flex", gap: 4, background: C.card, borderRadius: 9, padding: 3, border: `1px solid ${C.border}`, overflowX: "auto" }}>
-            {types.map(t => (<button key={t} onClick={() => setFilter(t)} style={{ padding: "6px 14px", borderRadius: 7, border: "none", background: filter === t ? C.accent : "transparent", color: filter === t ? "#fff" : C.t2, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font, whiteSpace: "nowrap" }}>{tl[t] || t}</button>))}
+            {types.map(t => (<button key={t} onClick={() => setFilter(t)} style={{ padding: "6px 14px", borderRadius: 7, border: "none", background: filter === t ? C.t1 : "transparent", color: filter === t ? "#fff" : C.t2, fontSize: 11, fontWeight: 600, cursor: "pointer", fontFamily: font, whiteSpace: "nowrap" }}>{tl[t] || t}</button>))}
           </div>
           {isAdmin && (
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: C.t2, cursor: "pointer", background: C.card, padding: "6px 14px", borderRadius: 8, border: `1px solid ${C.border}` }}>
-                <input type="checkbox" checked={hideUnavailable} onChange={e => setHideUnavailable(e.target.checked)} style={{ cursor: "pointer", accentColor: C.accent }} />
+                <input type="checkbox" checked={hideUnavailable} onChange={e => setHideUnavailable(e.target.checked)} style={{ cursor: "pointer", accentColor: C.t1 }} />
                 ซ่อนรถที่ไม่พร้อมใช้งาน
               </label>
-              <button onClick={onAddCarClick} style={{ padding: "7px 14px", borderRadius: 8, border: "none", background: C.accent, color: "#fff", fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: font }}>+ เพิ่มรถใหม่</button>
+              <button onClick={onAddCarClick} style={{ padding: "7px 14px", borderRadius: 8, border: `1px solid ${C.border}`, background: "#fff", color: C.t1, fontWeight: 700, fontSize: 12, cursor: "pointer", fontFamily: font }}>+ เพิ่มรถใหม่</button>
             </div>
           )}
         </div>
@@ -856,16 +856,16 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
 
           return (
             <div key={car.id} style={{ background: C.card, borderRadius: 14, overflow: "hidden", border: `1px solid ${C.border}`, position: "relative" }}>
-              <div style={{ height: m ? 90 : 110, background: `linear-gradient(135deg,${car.color}15,${car.color}08)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: m ? 42 : 52, position: "relative" }}>{car.image}<div style={{ position: "absolute", top: 10, right: 10 }}><Badge status={car.status} /></div></div>
+              <div style={{ height: m ? 90 : 110, background: "#F5F5F7", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: m ? 42 : 52, position: "relative" }}>{car.image}<div style={{ position: "absolute", top: 10, right: 10 }}><Badge status={car.status} /></div></div>
               <div style={{ padding: "14px 16px 16px" }}>
-                <div style={{ fontSize: 15, fontWeight: 700 }}>{car.name}</div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: C.t1 }}>{car.name}</div>
                 <div style={{ display: "flex", gap: 14, margin: "6px 0 14px" }}><span style={{ fontSize: 11, color: C.t2 }}>🔖 {car.licensePlate}</span><span style={{ fontSize: 11, color: C.t2 }}>🏷️ {car.type}</span></div>
                 {isAdmin && (
-                  <button onClick={() => onToggleCarStatus(car.id, car.status)} style={{ width: "100%", padding: "7px", borderRadius: 8, border: `1px solid ${car.status === "available" ? "#FECACA" : "#A7F3D0"}`, background: car.status === "available" ? "#FEF2F2" : "#ECFDF5", color: car.status === "available" ? "#991B1B" : "#065F46", fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font, marginBottom: 8, transition: "0.2s" }}>
-                    {car.status === "available" ? "🚫 ปิดใช้งานรถคันนี้" : "✅ เปิดใช้งานปกติ"}
+                  <button onClick={() => onToggleCarStatus(car.id, car.status)} style={{ width: "100%", padding: "7px", borderRadius: 8, border: `1px solid ${C.border}`, background: "#fff", color: car.status === "available" ? C.danger : C.t1, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font, marginBottom: 8, transition: "0.2s" }}>
+                    {car.status === "available" ? "ปิดใช้งานรถคันนี้" : "เปิดใช้งานปกติ"}
                   </button>
                 )}
-                <button onClick={() => !isDisabled && onBook(car)} disabled={isDisabled} style={{ width: "100%", padding: "9px", borderRadius: 9, border: "none", fontFamily: font, background: !isDisabled ? C.accent : "#E2E8F0", color: !isDisabled ? "#fff" : C.t3, fontWeight: 700, fontSize: 12, cursor: !isDisabled ? "pointer" : "not-allowed" }}>{!avail ? "ไม่พร้อมใช้งาน" : active ? "ถูกจองแล้ว" : hasActiveBooking ? "จำกัด 1 คัน/คน" : "จองรถคันนี้"}</button>
+                <button onClick={() => !isDisabled && onBook(car)} disabled={isDisabled} style={{ width: "100%", padding: "9px", borderRadius: 9, border: "none", fontFamily: font, background: !isDisabled ? C.t1 : "#F5F5F7", color: !isDisabled ? "#fff" : C.t3, fontWeight: 700, fontSize: 12, cursor: !isDisabled ? "pointer" : "not-allowed" }}>{!avail ? "ไม่พร้อมใช้งาน" : active ? "ถูกจองแล้ว" : hasActiveBooking ? "จำกัด 1 คัน/คน" : "จองรถคันนี้"}</button>
               </div>
             </div>
           );
@@ -883,16 +883,16 @@ function BookingModal({ car, onClose, onSubmit, m, blackouts }) {
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: m ? "flex-end" : "center", justifyContent: "center", zIndex: 100, animation: "fadeIn 0.2s", backdropFilter: "blur(4px)" }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: m ? "18px 18px 0 0" : 18, padding: m ? "28px 20px 32px" : "28px 32px", width: m ? "100%" : 420, maxHeight: "90vh", overflow: "auto", animation: m ? "slideUp 0.25s" : "scaleIn 0.25s", boxShadow: "0 25px 60px rgba(0,0,0,0.2)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>จองรถ</h2><button onClick={onClose} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: C.t3 }}>✕</button></div>
-        <div style={{ display: "flex", alignItems: "center", gap: 14, padding: 14, background: `${car.color}08`, borderRadius: 10, marginBottom: 20, border: `1px solid ${car.color}20` }}><span style={{ fontSize: 36 }}>{car.image}</span><div><div style={{ fontWeight: 700, fontSize: 15 }}>{car.name}</div><div style={{ fontSize: 11, color: C.t2, marginTop: 2 }}>🔖 {car.licensePlate} · 🏷️ {car.type}</div></div></div>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, padding: 14, background: "#F5F5F7", borderRadius: 10, marginBottom: 20, border: `1px solid ${C.border}` }}><span style={{ fontSize: 36 }}>{car.image}</span><div><div style={{ fontWeight: 700, fontSize: 15, color: C.t1 }}>{car.name}</div><div style={{ fontSize: 11, color: C.t2, marginTop: 2 }}>🔖 {car.licensePlate} · 🏷️ {car.type}</div></div></div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วันที่-เวลาเริ่ม</label><input type="datetime-local" value={f.startDate} onChange={e => setF({ ...f, startDate: e.target.value })} style={{ width: "100%", padding: "9px 10px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font }} /></div>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วันที่-เวลาสิ้นสุด</label><input type="datetime-local" value={f.endDate} onChange={e => setF({ ...f, endDate: e.target.value })} style={{ width: "100%", padding: "9px 10px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วันที่-เวลาเริ่ม</label><input type="datetime-local" value={f.startDate} onChange={e => setF({ ...f, startDate: e.target.value })} style={{ width: "100%", padding: "9px 10px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วันที่-เวลาสิ้นสุด</label><input type="datetime-local" value={f.endDate} onChange={e => setF({ ...f, endDate: e.target.value })} style={{ width: "100%", padding: "9px 10px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
         </div>
         {blocked && <div style={{ padding: "8px 12px", borderRadius: 8, background: "#FEF2F2", border: "1px solid #FECACA", marginBottom: 14, fontSize: 12, color: "#991B1B" }}>🚧 ช่วงวันที่เลือกตรงกับวันห้ามจอง: {blocked.date} — {blocked.reason}</div>}
-        <div style={{ marginBottom: 20 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วัตถุประสงค์</label><textarea value={f.purpose} onChange={e => setF({ ...f, purpose: e.target.value })} rows={3} placeholder="เช่น พบลูกค้า, ขนส่งสินค้า..." style={{ width: "100%", padding: "9px 12px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, resize: "vertical" }} /></div>
+        <div style={{ marginBottom: 20 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>วัตถุประสงค์</label><textarea value={f.purpose} onChange={e => setF({ ...f, purpose: e.target.value })} rows={3} placeholder="เช่น พบลูกค้า, ขนส่งสินค้า..." style={{ width: "100%", padding: "9px 12px", border: `1px solid ${C.border}`, borderRadius: 9, fontSize: 12, fontFamily: font, resize: "vertical", background: "#F5F5F7", color: C.t1 }} /></div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 9, background: "transparent", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
-          <button onClick={() => { if (f.startDate && f.endDate && f.purpose && !blocked) onSubmit(car.id, f); }} disabled={!f.startDate || !f.endDate || !f.purpose || !!blocked} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, fontFamily: font, background: f.startDate && f.endDate && f.purpose && !blocked ? C.accent : "#E2E8F0", color: f.startDate && f.endDate && f.purpose && !blocked ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.startDate && f.endDate && f.purpose && !blocked ? "pointer" : "not-allowed" }}>ส่งคำขอจอง</button>
+          <button onClick={onClose} style={{ flex: 1, padding: "10px", border: `1px solid ${C.border}`, borderRadius: 9, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
+          <button onClick={() => { if (f.startDate && f.endDate && f.purpose && !blocked) onSubmit(car.id, f); }} disabled={!f.startDate || !f.endDate || !f.purpose || !!blocked} style={{ flex: 1, padding: "10px", border: "none", borderRadius: 9, fontFamily: font, background: f.startDate && f.endDate && f.purpose && !blocked ? C.t1 : "#E5E5EA", color: f.startDate && f.endDate && f.purpose && !blocked ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.startDate && f.endDate && f.purpose && !blocked ? "pointer" : "not-allowed" }}>ส่งคำขอจอง</button>
         </div>
       </div>
     </div>
@@ -943,7 +943,7 @@ function UsersManage({ users, setUsers, m }) {
                 </td>
                 <td style={{ padding: "12px", color: C.t2 }}>{u.email}</td>
                 <td style={{ padding: "12px", color: C.t2 }}>{u.department || "-"}</td>
-                <td style={{ padding: "12px" }}><span style={{ background: u.role === "admin" ? "#FEE2E2" : "#E0E7FF", color: u.role === "admin" ? "#991B1B" : "#3730A3", padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700 }}>{u.role === "admin" ? "Admin" : "User"}</span></td>
+                <td style={{ padding: "12px" }}><span style={{ background: u.role === "admin" ? C.t1 : "#F5F5F7", color: u.role === "admin" ? "#fff" : C.t2, padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, border: u.role !== "admin" ? `1px solid ${C.border}` : "none" }}>{u.role === "admin" ? "Admin" : "User"}</span></td>
               </tr>
             ))}</tbody>
           </table>
@@ -966,13 +966,13 @@ function AddUserModal({ onClose, onSubmit, m }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>เพิ่มผู้ใช้งานใหม่</h2><button onClick={onClose} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: C.t3 }}>✕</button></div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>ชื่อ-นามสกุล <span style={{ color: C.danger }}>*</span></label><input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder="ชื่อ นามสกุล" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font }} /></div>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล <span style={{ color: C.danger }}>*</span></label><input type="email" value={f.email} onChange={e => setF({ ...f, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font }} /></div>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>รหัสผ่าน <span style={{ color: C.danger }}>*</span></label><input type="password" value={f.password} onChange={e => setF({ ...f, password: e.target.value })} placeholder="••••••••" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font }} /></div>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>แผนก</label><input value={f.department} onChange={e => setF({ ...f, department: e.target.value })} placeholder="เช่น IT, HR, Sales" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>ชื่อ-นามสกุล <span style={{ color: C.danger }}>*</span></label><input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder="ชื่อ นามสกุล" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล <span style={{ color: C.danger }}>*</span></label><input type="email" value={f.email} onChange={e => setF({ ...f, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>รหัสผ่าน <span style={{ color: C.danger }}>*</span></label><input type="password" value={f.password} onChange={e => setF({ ...f, password: e.target.value })} placeholder="••••••••" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>แผนก</label><input value={f.department} onChange={e => setF({ ...f, department: e.target.value })} placeholder="เช่น IT, HR, Sales" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
           <div>
             <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>สิทธิ์การใช้งาน</label>
-            <select value={f.role} onChange={e => setF({ ...f, role: e.target.value })} style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#fff" }}>
+            <select value={f.role} onChange={e => setF({ ...f, role: e.target.value })} style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1, cursor: "pointer" }}>
               <option value="user">ผู้ใช้งานทั่วไป (User)</option>
               <option value="admin">ผู้ดูแลระบบ (Admin)</option>
             </select>
@@ -980,8 +980,8 @@ function AddUserModal({ onClose, onSubmit, m }) {
         </div>
 
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "12px", border: `1px solid ${C.border}`, borderRadius: 10, background: "transparent", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
-          <button onClick={() => { if (f.name && f.email && f.password) onSubmit(f); }} disabled={!f.name || !f.email || !f.password} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 10, fontFamily: font, background: f.name && f.email && f.password ? C.accent : "#E2E8F0", color: f.name && f.email && f.password ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.name && f.email && f.password ? "pointer" : "not-allowed" }}>ยืนยันเพิ่มผู้ใช้งาน</button>
+          <button onClick={onClose} style={{ flex: 1, padding: "12px", border: `1px solid ${C.border}`, borderRadius: 10, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
+          <button onClick={() => { if (f.name && f.email && f.password) onSubmit(f); }} disabled={!f.name || !f.email || !f.password} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 10, fontFamily: font, background: f.name && f.email && f.password ? C.t1 : "#E5E5EA", color: f.name && f.email && f.password ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.name && f.email && f.password ? "pointer" : "not-allowed" }}>ยืนยันเพิ่มผู้ใช้งาน</button>
         </div>
       </div>
     </div>
@@ -990,7 +990,7 @@ function AddUserModal({ onClose, onSubmit, m }) {
 
 // ─── Dashboard ───────────────────────────────────────────────
 function Dashboard({ bookings, cars, users, m }) {
-  const stats = [{ label: "รถทั้งหมด", value: cars.length, icon: "🚗", color: "#3B82F6", bg: "#EFF6FF" }, { label: "รถว่าง", value: cars.filter(c => c.status === "available").length, icon: "✅", color: "#10B981", bg: "#ECFDF5" }, { label: "รอดำเนินการ", value: bookings.filter(b => b.status === "pending").length, icon: "⏳", color: "#F59E0B", bg: "#FFFBEB" }, { label: "จองเดือนนี้", value: bookings.filter(b => b.status === "approved" || b.status === "completed").length, icon: "📈", color: "#8B5CF6", bg: "#F5F3FF" }];
+  const stats = [{ label: "รถทั้งหมด", value: cars.length, icon: "🚗", color: C.t1, bg: "#F5F5F7" }, { label: "รถว่าง", value: cars.filter(c => c.status === "available").length, icon: "✅", color: C.t1, bg: "#F5F5F7" }, { label: "รอดำเนินการ", value: bookings.filter(b => b.status === "pending").length, icon: "⏳", color: C.t1, bg: "#F5F5F7" }, { label: "จองเดือนนี้", value: bookings.filter(b => b.status === "approved" || b.status === "completed").length, icon: "📈", color: C.t1, bg: "#F5F5F7" }];
   return (
     <div style={{ animation: "fadeIn 0.3s" }}>
       <div style={{ marginBottom: 24 }}><h1 style={{ fontSize: m ? 20 : 26, fontWeight: 800, margin: 0 }}>แดชบอร์ด</h1><p style={{ color: C.t2, fontSize: 13, margin: "4px 0 0" }}>ภาพรวมระบบจองรถบริษัท</p></div>
@@ -1002,7 +1002,7 @@ function Dashboard({ bookings, cars, users, m }) {
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, minWidth: 450 }}>
             <thead><tr style={{ borderBottom: `2px solid ${C.border}` }}>{["ผู้จอง", "รถ", "วันที่", "สถานะ"].map(h => <th key={h} style={{ textAlign: "left", padding: "8px 10px", color: C.t2, fontWeight: 600, fontSize: 10 }}>{h}</th>)}</tr></thead>
-            <tbody>{bookings.slice(0, 6).map(b => { const u = users.find(x => x.id === b.userId); const car = cars.find(c => c.id === b.carId); return (<tr key={b.id} style={{ borderBottom: `1px solid ${C.border}` }}><td style={{ padding: 10 }}><div style={{ display: "flex", alignItems: "center", gap: 6 }}><span>{u?.avatar}</span><div><div style={{ fontWeight: 600 }}>{u?.name}</div><div style={{ fontSize: 10, color: C.t3 }}>{u?.department}</div></div></div></td><td style={{ padding: 10 }}>{car?.image} {car?.name}</td><td style={{ padding: 10, color: C.t2, whiteSpace: "nowrap" }}>{b.startDate?.substring(0, 10)}</td><td style={{ padding: 10 }}><Badge status={b.status} /></td></tr>); })}</tbody>
+            <tbody>{bookings.slice(0, 6).map(b => { const u = users.find(x => x.id === b.userId); const car = cars.find(c => c.id === b.carId); return (<tr key={b.id} style={{ borderBottom: `1px solid ${C.border}` }}><td style={{ padding: 10 }}><div style={{ display: "flex", alignItems: "center", gap: 6 }}><span>{u?.avatar}</span><div><div style={{ fontWeight: 600, color: C.t1 }}>{u?.name}</div><div style={{ fontSize: 10, color: C.t3 }}>{u?.department}</div></div></div></td><td style={{ padding: 10 }}>{car?.image} <span style={{ color: C.t1 }}>{car?.name}</span></td><td style={{ padding: 10, color: C.t2, whiteSpace: "nowrap" }}>{b.startDate?.substring(0, 10)}</td><td style={{ padding: 10 }}><Badge status={b.status} /></td></tr>); })}</tbody>
           </table>
         </div>
       </div>
@@ -1026,8 +1026,8 @@ function Reports({ bookings, cars, users, m }) {
         <button onClick={exportCSV} style={{ padding: "9px 18px", borderRadius: 9, border: "none", background: C.accent, color: "#fff", fontWeight: 600, fontSize: 12, cursor: "pointer", fontFamily: font }}>📥 Export CSV</button>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: m ? "repeat(2,1fr)" : "repeat(5,1fr)", gap: 10, marginBottom: 20 }}>
-        {[{ l: "ทั้งหมด", v: bookings.length, c: "#3B82F6" }, { l: "อนุมัติ", v: bookings.filter(b => b.status === "approved").length, c: "#10B981" }, { l: "รอดำเนินการ", v: bookings.filter(b => b.status === "pending").length, c: "#F59E0B" }, { l: "ปฏิเสธ", v: bookings.filter(b => b.status === "rejected").length, c: "#EF4444" }, { l: "ยกเลิก/เสร็จสิ้น", v: bookings.filter(b => b.status === "cancelled" || b.status === "completed").length, c: "#9CA3AF" }].map((s, i) => (
-          <div key={i} style={{ background: C.card, borderRadius: 12, padding: "14px 12px", border: `1px solid ${C.border}` }}><div style={{ fontSize: 11, color: C.t2, marginBottom: 5 }}>{s.l}</div><div style={{ fontSize: 26, fontWeight: 800, color: s.c }}>{s.v}</div></div>
+        {[{ l: "ทั้งหมด", v: bookings.length, c: C.t1 }, { l: "อนุมัติ", v: bookings.filter(b => b.status === "approved").length, c: C.t1 }, { l: "รอดำเนินการ", v: bookings.filter(b => b.status === "pending").length, c: C.t1 }, { l: "ปฏิเสธ", v: bookings.filter(b => b.status === "rejected").length, c: C.t1 }, { l: "ยกเลิก/เสร็จสิ้น", v: bookings.filter(b => b.status === "cancelled" || b.status === "completed").length, c: C.t1 }].map((s, i) => (
+          <div key={i} style={{ background: "#F5F5F7", borderRadius: 12, padding: "14px 12px", border: `1px solid ${C.border}` }}><div style={{ fontSize: 11, color: C.t2, marginBottom: 5 }}>{s.l}</div><div style={{ fontSize: 26, fontWeight: 800, color: s.c }}>{s.v}</div></div>
         ))}
       </div>
       <div style={{ background: C.card, borderRadius: 14, padding: m ? 14 : 20, border: `1px solid ${C.border}` }}>
