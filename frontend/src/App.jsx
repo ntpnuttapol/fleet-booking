@@ -459,8 +459,10 @@ export default function App() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap');
         @keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideUpFade{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes scaleIn{from{opacity:0;transform:scale(0.95)}to{opacity:1;transform:scale(1)}}
+        @keyframes float{0%{transform:translateY(0px)}50%{transform:translateY(-12px)}100%{transform:translateY(0px)}}
         @keyframes slideRight{from{transform:translateX(-100%)}to{transform:translateX(0)}}
         @keyframes bellShake{0%{transform:rotate(0)}15%{transform:rotate(12deg)}30%{transform:rotate(-10deg)}45%{transform:rotate(8deg)}60%{transform:rotate(-6deg)}75%{transform:rotate(3deg)}100%{transform:rotate(0)}}
         @keyframes panelSlide{from{opacity:0;transform:translateY(-8px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
@@ -565,50 +567,61 @@ function LoginPage({ form, setForm, error, onLogin, isMobile }) {
     <div style={{ fontFamily: font, minHeight: "100dvh", display: "flex", flexDirection: isMobile ? "column" : "row", background: "linear-gradient(135deg, #F4FAFA 0%, #E0F2F1 100%)", overflow: "hidden" }}>
 
       {/* Left Side: Hero Section */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: isMobile ? "40px 24px" : "60px 80px", position: "relative", zIndex: 1 }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", padding: isMobile ? "40px 24px" : "80px 100px", position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: isMobile ? 30 : 60, animation: "fadeIn 0.5s" }}>
           <img src="/logo.png" alt="logo" style={{ height: isMobile ? 36 : 48, objectFit: "contain" }} onError={(e) => { e.target.style.display = 'none'; }} />
           <div style={{ fontSize: isMobile ? 24 : 32, fontWeight: 800, color: C.accent, letterSpacing: "-0.5px" }}>Polyfoam</div>
         </div>
 
-        <div style={{ animation: "slideUp 0.6s ease-out" }}>
-          <div style={{ display: "inline-block", padding: "6px 16px", background: `${C.accent}15`, color: C.accent, borderRadius: 20, fontSize: 13, fontWeight: 700, marginBottom: 24, border: `1px solid ${C.accent}30` }}>
+        <div>
+          <div style={{ display: "inline-block", padding: "6px 16px", background: `${C.accent}15`, color: C.accent, borderRadius: 20, fontSize: 13, fontWeight: 700, marginBottom: 24, border: `1px solid ${C.accent}30`, animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.1s" }}>
             ✨ ระบบจัดการยานพาหนะอัจฉริยะ
           </div>
-          <h1 style={{ fontSize: isMobile ? 36 : 56, fontWeight: 800, color: C.t1, lineHeight: 1.15, margin: "0 0 24px", letterSpacing: "-1px" }}>
+          <h1 style={{ fontSize: isMobile ? 36 : 64, fontWeight: 800, color: C.t1, lineHeight: 1.15, margin: "0 0 24px", letterSpacing: "-1.5px", animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.2s" }}>
             จองรถบริษัท<br />
-            <span style={{ color: C.accent }}>ง่าย อนุมัติไว</span> ในที่เดียว
+            <span style={{ color: C.accent, background: `linear-gradient(90deg, ${C.accent}, #00D3B9)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>ง่าย อนุมัติไว</span> ในที่เดียว
           </h1>
-          <p style={{ fontSize: isMobile ? 15 : 18, color: C.t2, lineHeight: 1.6, margin: "0 0 40px", maxWidth: 500, fontWeight: 500 }}>
+          <p style={{ fontSize: isMobile ? 15 : 18, color: C.t2, lineHeight: 1.6, margin: "0 0 50px", maxWidth: 500, fontWeight: 500, animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.3s" }}>
             ยกระดับการจัดการรถยนต์องค์กร ด้วยระบบที่ออกแบบมาให้ใช้งานง่าย รวดเร็ว และโปร่งใส สามารถตรวจสอบสถานะได้แบบ Real-time
           </p>
 
           {!isMobile && (
-            <div style={{ display: "flex", gap: 24 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}><span style={{ width: 40, height: 40, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", color: C.accent }}>🚗</span><span style={{ fontSize: 14, fontWeight: 600, color: C.t1 }}>เลือกรถหลากหลาย</span></div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}><span style={{ width: 40, height: 40, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", color: C.accent }}>⚡</span><span style={{ fontSize: 14, fontWeight: 600, color: C.t1 }}>จองรวดเร็ว</span></div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}><span style={{ width: 40, height: 40, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20, boxShadow: "0 4px 12px rgba(0,0,0,0.05)", color: C.accent }}>📱</span><span style={{ fontSize: 14, fontWeight: 600, color: C.t1 }}>รองรับทุกอุปกรณ์</span></div>
+            <div style={{ display: "flex", gap: 24, animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.4s" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", background: "rgba(255,255,255,0.6)", borderRadius: 16, backdropFilter: "blur(10px)", border: `1px solid rgba(255,255,255,0.8)`, animation: "float 6s ease-in-out infinite" }}>
+                <span style={{ width: 44, height: 44, borderRadius: 14, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, boxShadow: "0 4px 12px rgba(0,180,159,0.1)", color: C.accent }}>🚗</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>เลือกรถหลากหลาย</span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 20px", background: "rgba(255,255,255,0.6)", borderRadius: 16, backdropFilter: "blur(10px)", border: `1px solid rgba(255,255,255,0.8)`, animation: "float 6s ease-in-out infinite", animationDelay: "1s" }}>
+                <span style={{ width: 44, height: 44, borderRadius: 14, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, boxShadow: "0 4px 12px rgba(0,180,159,0.1)", color: C.accent }}>⚡</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>จองรวดเร็ว</span>
+              </div>
             </div>
           )}
         </div>
 
         {/* Decorative elements */}
         {!isMobile && (
-          <div style={{ position: "absolute", top: "10%", right: "10%", width: 300, height: 300, background: "radial-gradient(circle, rgba(0,180,159,0.15) 0%, rgba(255,255,255,0) 70%)", borderRadius: "50%", zIndex: -1 }} />
+          <div style={{ position: "absolute", top: "20%", left: "60%", width: 500, height: 500, background: "radial-gradient(circle, rgba(0,180,159,0.08) 0%, rgba(255,255,255,0) 70%)", borderRadius: "50%", zIndex: -1, animation: "float 10s ease-in-out infinite alternate" }} />
         )}
       </div>
 
       {/* Right Side: Login Box */}
-      <div style={{ flex: isMobile ? "none" : 1, display: "flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "0 20px 40px" : "40px", position: "relative", zIndex: 2 }}>
-        <div style={{ width: "100%", maxWidth: 420, padding: isMobile ? "32px 24px" : "48px 40px", background: "#FFFFFF", border: `1px solid rgba(255,255,255,0.8)`, borderRadius: 28, boxShadow: "0 24px 60px rgba(0,180,159,0.1), 0 0 0 1px rgba(0,180,159,0.05)", animation: "scaleIn 0.5s ease-out", backdropFilter: "blur(10px)" }}>
-          <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <div style={{ fontSize: 28, fontWeight: 800, color: C.t1, marginBottom: 8 }}>เข้าสู่ระบบ</div>
-            <div style={{ fontSize: 14, color: C.t2, fontWeight: 500 }}>กรอกอีเมลและรหัสผ่านเพื่อเข้าใช้งานระบบ</div>
+      <div style={{ flex: isMobile ? "none" : "0 0 45%", display: "flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "0 20px 40px" : "40px 60px 40px 0", position: "relative", zIndex: 2 }}>
+        <div style={{ width: "100%", maxWidth: 440, padding: isMobile ? "32px 24px" : "50px 44px", background: "#FFFFFF", border: `1px solid rgba(255,255,255,0.9)`, borderRadius: 32, boxShadow: "0 30px 80px rgba(0,180,159,0.12), 0 0 0 1px rgba(0,180,159,0.02)", animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.2s" }}>
+          <div style={{ textAlign: "center", marginBottom: 36 }}>
+            <div style={{ fontSize: 32, fontWeight: 800, color: C.t1, marginBottom: 10, letterSpacing: "-0.5px" }}>เข้าระบบ</div>
+            <div style={{ fontSize: 14, color: C.t2, fontWeight: 500 }}>กรอกอีเมลและรหัสผ่านเพื่อเข้าใช้งาน</div>
           </div>
-          {error && <div style={{ background: "rgba(255,59,48,0.1)", border: "1px solid rgba(255,59,48,0.2)", borderRadius: 12, padding: "10px 14px", marginBottom: 16, color: C.danger, fontSize: 13, fontWeight: 500 }}>{error}</div>}
-          <div style={{ marginBottom: 14 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล หรือ ชื่อผู้ใช้งาน</label><input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com หรือ somchai_admin" style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
-          <div style={{ marginBottom: 24 }}><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>รหัสผ่าน</label><input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••" onKeyDown={e => e.key === "Enter" && onLogin()} style={{ width: "100%", padding: "10px 14px", background: "#F5F5F7", border: `1px solid ${C.border}`, borderRadius: 10, color: C.t1, fontSize: 13, fontFamily: font }} /></div>
-          <button onClick={onLogin} style={{ width: "100%", padding: "12px", background: C.accent, color: "#fff", border: "none", borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: font }}>เข้าสู่ระบบ</button>
+          {error && <div style={{ background: "rgba(255,59,48,0.08)", border: "1px solid rgba(255,59,48,0.2)", borderRadius: 14, padding: "12px 16px", marginBottom: 20, color: C.danger, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>⚠️</span> {error}</div>}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: C.t2, marginBottom: 8 }}>อีเมล</label>
+            <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "14px 16px", background: "#F4FAFA", border: `2px solid transparent`, borderRadius: 14, color: C.t1, fontSize: 14, fontFamily: font, transition: "0.2s" }} onFocus={e => { e.target.style.background = "#fff"; e.target.style.borderColor = C.accent; }} onBlur={e => { e.target.style.background = "#F4FAFA"; e.target.style.borderColor = "transparent"; }} />
+          </div>
+          <div style={{ marginBottom: 32 }}>
+            <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: C.t2, marginBottom: 8 }}>รหัสผ่าน</label>
+            <input type="password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} placeholder="••••••••" onKeyDown={e => e.key === "Enter" && onLogin()} style={{ width: "100%", padding: "14px 16px", background: "#F4FAFA", border: `2px solid transparent`, borderRadius: 14, color: C.t1, fontSize: 14, fontFamily: font, transition: "0.2s", letterSpacing: 2 }} onFocus={e => { e.target.style.background = "#fff"; e.target.style.borderColor = C.accent; }} onBlur={e => { e.target.style.background = "#F4FAFA"; e.target.style.borderColor = "transparent"; }} />
+          </div>
+          <button onClick={onLogin} style={{ width: "100%", padding: "14px", background: C.accent, color: "#fff", border: "none", borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: "pointer", fontFamily: font, transition: "0.2s", boxShadow: `0 8px 20px ${C.accent}40` }} onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 12px 24px ${C.accent}50`; }} onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 8px 20px ${C.accent}40`; }}>เข้าสู่ระบบ</button>
         </div>
       </div>
     </div>
