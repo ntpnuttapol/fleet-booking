@@ -949,9 +949,6 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
   const types = ["all", ...new Set(visibleCars.map(c => c.type))];
   const tl = { all: "ทั้งหมด", Sedan: "Sedan", SUV: "SUV", Pickup: "กระบะ", Van: "ตู้" };
 
-  // Check if current user already has an active booking
-  const hasActiveBooking = !isAdmin && bookings.some(b => b.userId === currentUser.id && (b.status === "pending" || b.status === "approved" || b.status === "active") && new Date(b.endDate) >= new Date());
-
   return (
     <div style={{ animation: "fadeIn 0.3s" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: m ? "flex-start" : "flex-end", marginBottom: 20, flexDirection: m ? "column" : "row", gap: 10 }}>
@@ -974,15 +971,13 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
       {blackouts.length > 0 && (
         <div style={{ padding: "10px 14px", borderRadius: 10, background: "#FEF2F2", border: "1px solid #FECACA", marginBottom: 16, fontSize: 12, color: "#991B1B", display: "flex", gap: 6, alignItems: "center" }}>🚧 มีวันห้ามจอง: {blackouts.map(b => b.date).join(", ")}</div>
       )}
-      {hasActiveBooking && (
-        <div style={{ padding: "10px 14px", borderRadius: 10, background: "#FEF2F2", border: "1px solid #FECACA", marginBottom: 16, fontSize: 13, color: "#991B1B", display: "flex", gap: 6, alignItems: "center", fontWeight: 600 }}>⚠️ คุณมีการจองที่กำลังใช้งานหรือรออนุมัติอยู่แล้ว (จำกัด 1 คันต่อคน)</div>
-      )}
       <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "repeat(3,1fr)", gap: 14 }}>
         {filtered.map(car => {
           const avail = car.status === "available";
-          const active = bookings.find(b => b.carId === car.id && (b.status === "approved" || b.status === "pending") && new Date(b.endDate) >= new Date());
+          const activeBookings = bookings.filter(b => b.carId === car.id && (b.status === "approved" || b.status === "pending") && new Date(b.endDate) >= new Date()).sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+          const nextBooking = activeBookings[0];
 
-          const isDisabled = !avail || !!active || hasActiveBooking;
+          const isDisabled = !avail;
 
           return (
             <div key={car.id} style={{ background: C.card, borderRadius: 14, overflow: "hidden", border: `1px solid ${C.border}`, position: "relative" }}>
@@ -990,6 +985,15 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
               <div style={{ padding: "14px 16px 16px" }}>
                 <div style={{ fontSize: 15, fontWeight: 700, color: C.t1 }}>{car.name}</div>
                 <div style={{ display: "flex", gap: 14, margin: "6px 0 14px" }}><span style={{ fontSize: 11, color: C.t2 }}>🔖 {car.licensePlate}</span><span style={{ fontSize: 11, color: C.t2 }}>🏷️ {car.type}</span></div>
+                {nextBooking && (
+                  <div style={{ marginBottom: 14, padding: "8px 10px", background: "#F4F0F8", border: `1px solid #E8E0F0`, borderRadius: 8, fontSize: 11, color: C.t2 }}>
+                    <div style={{ fontWeight: 700, color: C.t1, marginBottom: 4 }}>👤 {nextBooking.user?.name || "ผู้ใช้งาน"} จองไว้</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <span>🗓️ {new Date(nextBooking.startDate).toLocaleDateString('th-TH')}</span>
+                      <span>⏰ {new Date(nextBooking.startDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })} - {new Date(nextBooking.endDate).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                  </div>
+                )}
                 {isAdmin && (
                   <div style={{ display: "flex", gap: 10, marginBottom: 8 }}>
                     <button onClick={() => onEditCarClick(car)} style={{ flex: 1, padding: "7px", borderRadius: 8, border: `1px solid ${C.border}`, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 11, cursor: "pointer", fontFamily: font, transition: "0.2s" }}>
@@ -1000,7 +1004,7 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
                     </button>
                   </div>
                 )}
-                <button onClick={() => !isDisabled && onBook(car)} disabled={isDisabled} style={{ width: "100%", padding: "9px", borderRadius: 9, border: "none", fontFamily: font, background: !isDisabled ? C.accent : "#F5F5F7", color: !isDisabled ? "#fff" : C.t3, fontWeight: 700, fontSize: 12, cursor: !isDisabled ? "pointer" : "not-allowed" }}>{!avail ? "ไม่พร้อมใช้งาน" : active ? "ถูกจองแล้ว" : hasActiveBooking ? "จำกัด 1 คัน/คน" : "จองรถคันนี้"}</button>
+                <button onClick={() => !isDisabled && onBook(car)} disabled={isDisabled} style={{ width: "100%", padding: "9px", borderRadius: 9, border: "none", fontFamily: font, background: !isDisabled ? C.accent : "#F5F5F7", color: !isDisabled ? "#fff" : C.t3, fontWeight: 700, fontSize: 12, cursor: !isDisabled ? "pointer" : "not-allowed" }}>{!avail ? "ไม่พร้อมใช้งาน" : "จองรถคันนี้"}</button>
               </div>
             </div>
           );
