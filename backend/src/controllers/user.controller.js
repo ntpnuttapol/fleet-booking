@@ -115,4 +115,52 @@ const createUser = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, login, getMe, createUser };
+const updateUser = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({ error: "ไม่มีสิทธิ์ใช้งานส่วนนี้ (เฉพาะ Admin เท่านั้น)" });
+        }
+
+        const { id } = req.params;
+        const { name, username, email, department, role, password } = req.body;
+
+        const userId = parseInt(id);
+        if (isNaN(userId)) return res.status(400).json({ error: "Invalid user ID" });
+
+        // Check if username/email already exists for a DIFFERENT user
+        const identifier = email || username;
+        if (identifier) {
+            const existingUser = await prisma.user.findFirst({
+                where: {
+                    id: { not: userId },
+                    OR: [
+                        { email: identifier },
+                        { username: identifier }
+                    ]
+                }
+            });
+
+            if (existingUser) {
+                return res.status(400).json({ error: "ชื่อผู้ใช้หรืออีเมลนี้ถูกใช้งานแล้ว" });
+            }
+        }
+
+        const updateData = { name, username, email, department, role };
+
+        if (password) {
+            updateData.password = await bcrypt.hash(password, 10);
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: updateData,
+            select: { id: true, name: true, username: true, email: true, department: true, role: true, avatar: true }
+        });
+
+        res.json(updatedUser);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+module.exports = { getUsers, login, getMe, createUser, updateUser };

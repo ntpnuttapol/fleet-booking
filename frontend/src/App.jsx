@@ -1098,6 +1098,7 @@ function BookingModal({ car, onClose, onSubmit, blackouts, m }) {
 // ─── Users Manage ────────────────────────────────────────────
 function UsersManage({ users, setUsers, m }) {
   const [modal, setModal] = useState(false);
+  const [editUser, setEditUser] = useState(null);
   const [toast, setToast] = useState(null);
 
   const handleAddUser = (userData) => {
@@ -1118,6 +1119,24 @@ function UsersManage({ users, setUsers, m }) {
       });
   };
 
+  const handleUpdateUser = (userData) => {
+    fetch(`${API_BASE}/api/users/${userData.id}`, {
+      method: "PUT", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem('fleetbook_token')}` },
+      body: JSON.stringify(userData)
+    })
+      .then(res => res.ok ? res.json() : res.json().then(err => Promise.reject(err.error || "ไม่สามารถแก้ไขข้อมูลผู้ใช้งานได้")))
+      .then(updatedUser => {
+        setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+        setEditUser(null);
+        setToast({ msg: "แก้ไขข้อมูลผู้ใช้งานสำเร็จ", icon: "✅" });
+        setTimeout(() => setToast(null), 3000);
+      })
+      .catch(err => {
+        setToast({ msg: err, icon: "❌" });
+        setTimeout(() => setToast(null), 3000);
+      });
+  };
+
   return (
     <div style={{ animation: "fadeIn 0.3s" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: m ? "flex-start" : "flex-end", marginBottom: 20, flexDirection: m ? "column" : "row", gap: 12 }}>
@@ -1128,7 +1147,7 @@ function UsersManage({ users, setUsers, m }) {
       <div style={{ background: C.card, borderRadius: 14, padding: m ? 12 : 20, border: `1px solid ${C.border}`, overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 500 }}>
-            <thead><tr style={{ borderBottom: `2px solid ${C.border}` }}>{["ชื่อ-นามสกุล", "อีเมล / ชื่อผู้ใช้", "แผนก", "สิทธิ์"].map(h => <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: C.t2, fontWeight: 600, fontSize: 11 }}>{h}</th>)}</tr></thead>
+            <thead><tr style={{ borderBottom: `2px solid ${C.border}` }}>{["ชื่อ-นามสกุล", "อีเมล / ชื่อผู้ใช้", "แผนก", "สิทธิ์", "จัดการ"].map(h => <th key={h} style={{ textAlign: "left", padding: "10px 12px", color: C.t2, fontWeight: 600, fontSize: 11 }}>{h}</th>)}</tr></thead>
             <tbody>{users.map(u => (
               <tr key={u.id} style={{ borderBottom: `1px solid ${C.border}` }}>
                 <td style={{ padding: "12px" }}>
@@ -1143,6 +1162,9 @@ function UsersManage({ users, setUsers, m }) {
                 </td>
                 <td style={{ padding: "12px", color: C.t2 }}>{u.department || "-"}</td>
                 <td style={{ padding: "12px" }}><span style={{ background: u.role === "admin" ? C.t1 : "#F5F5F7", color: u.role === "admin" ? "#fff" : C.t2, padding: "4px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700, border: u.role !== "admin" ? `1px solid ${C.border}` : "none" }}>{u.role === "admin" ? "Admin" : "User"}</span></td>
+                <td style={{ padding: "12px" }}>
+                  <button onClick={() => setEditUser(u)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 14 }}>✏️</button>
+                </td>
               </tr>
             ))}</tbody>
           </table>
@@ -1150,26 +1172,28 @@ function UsersManage({ users, setUsers, m }) {
       </div>
 
       {modal && <AddUserModal onClose={() => setModal(false)} onSubmit={handleAddUser} m={m} />}
+      {editUser && <AddUserModal user={editUser} onClose={() => setEditUser(null)} onSubmit={handleUpdateUser} m={m} />}
       {toast && <div style={{ position: "fixed", bottom: m ? 16 : 28, left: m ? 16 : "auto", right: m ? 16 : 28, background: C.sidebar, color: "#fff", padding: "12px 20px", borderRadius: 12, fontSize: 13, fontWeight: 500, fontFamily: font, boxShadow: "0 8px 30px rgba(0,0,0,0.2)", animation: "slideUp 0.3s", zIndex: 999, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>{toast.icon}</span> {toast.msg}</div>}
     </div>
   );
 }
 
-// ─── Add User Modal ──────────────────────────────────────────
-function AddUserModal({ onClose, onSubmit, m }) {
-  const [f, setF] = useState({ name: "", username: "", email: "", password: "", department: "", role: "user" });
+// ─── Add/Edit User Modal ───────────────────────────────────────
+function AddUserModal({ user, onClose, onSubmit, m }) {
+  const isEdit = !!user;
+  const [f, setF] = useState(user || { name: "", username: "", email: "", password: "", department: "", role: "user" });
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: m ? "flex-end" : "center", justifyContent: "center", zIndex: 300, animation: "fadeIn 0.2s", backdropFilter: "blur(4px)" }} onClick={onClose}>
       <div onClick={e => e.stopPropagation()} style={{ background: C.card, borderRadius: m ? "18px 18px 0 0" : 18, padding: m ? "28px 20px 32px" : "28px 32px", width: m ? "100%" : 400, maxHeight: "90vh", overflow: "auto", animation: m ? "slideUp 0.25s" : "scaleIn 0.25s", boxShadow: "0 25px 60px rgba(0,0,0,0.2)" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>เพิ่มผู้ใช้งานใหม่</h2><button onClick={onClose} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: C.t3 }}>✕</button></div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}><h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>{isEdit ? "แก้ไขข้อมูลผู้ใช้งาน" : "เพิ่มผู้ใช้งานใหม่"}</h2><button onClick={onClose} style={{ background: "none", border: "none", fontSize: 18, cursor: "pointer", color: C.t3 }}>✕</button></div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 24 }}>
           <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>ชื่อ-นามสกุล <span style={{ color: C.danger }}>*</span></label><input value={f.name} onChange={e => setF({ ...f, name: e.target.value })} placeholder="ชื่อ นามสกุล" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
           <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>ชื่อผู้ใช้งาน (Username) <span style={{ color: C.danger }}>*</span></label><input value={f.username} onChange={e => setF({ ...f, username: e.target.value })} placeholder="somchai_admin" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล (ไม่บังคับ)</label><input type="email" value={f.email} onChange={e => setF({ ...f, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>รหัสผ่าน <span style={{ color: C.danger }}>*</span></label><input type="password" value={f.password} onChange={e => setF({ ...f, password: e.target.value })} placeholder="••••••••" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
-          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>แผนก</label><input value={f.department} onChange={e => setF({ ...f, department: e.target.value })} placeholder="เช่น IT, HR, Sales" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>อีเมล (ไม่บังคับ)</label><input type="email" value={f.email || ""} onChange={e => setF({ ...f, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>รหัสผ่าน {isEdit ? "(เว้นว่างไว้ถ้าไม่ต้องการเปลี่ยน)" : <span style={{ color: C.danger }}>*</span>}</label><input type="password" value={f.password || ""} onChange={e => setF({ ...f, password: e.target.value })} placeholder="••••••••" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
+          <div><label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>แผนก</label><input value={f.department || ""} onChange={e => setF({ ...f, department: e.target.value })} placeholder="เช่น IT, HR, Sales" style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1 }} /></div>
           <div>
             <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: C.t2, marginBottom: 5 }}>สิทธิ์การใช้งาน</label>
             <select value={f.role} onChange={e => setF({ ...f, role: e.target.value })} style={{ width: "100%", padding: "10px 14px", border: `1px solid ${C.border}`, borderRadius: 10, fontSize: 13, fontFamily: font, background: "#F5F5F7", color: C.t1, cursor: "pointer" }}>
@@ -1181,7 +1205,7 @@ function AddUserModal({ onClose, onSubmit, m }) {
 
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} style={{ flex: 1, padding: "12px", border: `1px solid ${C.border}`, borderRadius: 10, background: "#fff", color: C.t2, fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: font }}>ยกเลิก</button>
-          <button onClick={() => { if (f.name && (f.email || f.username) && f.password) onSubmit(f); }} disabled={!f.name || (!f.email && !f.username) || !f.password} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 10, fontFamily: font, background: f.name && (f.email || f.username) && f.password ? C.t1 : "#E5E5EA", color: f.name && (f.email || f.username) && f.password ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.name && (f.email || f.username) && f.password ? "pointer" : "not-allowed" }}>ยืนยันเพิ่มผู้ใช้งาน</button>
+          <button onClick={() => { if (f.name && (f.email || f.username) && (isEdit || f.password)) onSubmit(f); }} disabled={!f.name || (!f.email && !f.username) || (!isEdit && !f.password)} style={{ flex: 1, padding: "12px", border: "none", borderRadius: 10, fontFamily: font, background: f.name && (f.email || f.username) && (isEdit || f.password) ? C.t1 : "#E5E5EA", color: f.name && (f.email || f.username) && (isEdit || f.password) ? "#fff" : C.t3, fontWeight: 700, fontSize: 13, cursor: f.name && (f.email || f.username) && (isEdit || f.password) ? "pointer" : "not-allowed" }}>{isEdit ? "บันทึกการแก้ไข" : "ยืนยันเพิ่มผู้ใช้งาน"}</button>
         </div>
       </div>
     </div>
