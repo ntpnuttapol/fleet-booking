@@ -33,7 +33,7 @@ const createBooking = async (req, res) => {
                 where: {
                     userId,
                     status: { in: ['pending', 'approved'] },
-                    endDate: { gte: new Date() }
+                    endDate: { gte: new Date().toISOString() }
                 }
             });
             if (activeBooking) {
