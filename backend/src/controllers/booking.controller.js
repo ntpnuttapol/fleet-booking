@@ -32,7 +32,8 @@ const createBooking = async (req, res) => {
             const activeBooking = await prisma.booking.findFirst({
                 where: {
                     userId,
-                    status: { in: ['pending', 'approved'] }
+                    status: { in: ['pending', 'approved'] },
+                    endDate: { gte: new Date() }
                 }
             });
             if (activeBooking) {

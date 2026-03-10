@@ -950,7 +950,7 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
   const tl = { all: "ทั้งหมด", Sedan: "Sedan", SUV: "SUV", Pickup: "กระบะ", Van: "ตู้" };
 
   // Check if current user already has an active booking
-  const hasActiveBooking = !isAdmin && bookings.some(b => b.userId === currentUser.id && (b.status === "pending" || b.status === "approved" || b.status === "active"));
+  const hasActiveBooking = !isAdmin && bookings.some(b => b.userId === currentUser.id && (b.status === "pending" || b.status === "approved" || b.status === "active") && new Date(b.endDate) >= new Date());
 
   return (
     <div style={{ animation: "fadeIn 0.3s" }}>
@@ -980,7 +980,7 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
       <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "repeat(3,1fr)", gap: 14 }}>
         {filtered.map(car => {
           const avail = car.status === "available";
-          const active = bookings.find(b => b.carId === car.id && (b.status === "approved" || b.status === "pending"));
+          const active = bookings.find(b => b.carId === car.id && (b.status === "approved" || b.status === "pending") && new Date(b.endDate) >= new Date());
 
           const isDisabled = !avail || !!active || hasActiveBooking;
 
