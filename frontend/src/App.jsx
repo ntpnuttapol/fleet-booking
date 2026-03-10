@@ -140,7 +140,21 @@ export default function App() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [blackoutDates, setBlackoutDates] = useState([]);
-  const [page, setPage] = useState("dashboard");
+
+  const getInitialPage = () => {
+    const hash = window.location.hash.replace("#", "");
+    return hash || "dashboard"; // Will be overridden by login logic if needed
+  };
+  const [page, setPage] = useState(getInitialPage);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash) setPage(hash);
+    };
+    window.addEventListener("hashchange", handleHashChange);
+    return () => window.removeEventListener("hashchange", handleHashChange);
+  }, []);
   const [bookingModal, setBookingModal] = useState(null);
   const [carFormModal, setCarFormModal] = useState(null);
   const [toast, setToast] = useState(null);
@@ -303,7 +317,12 @@ export default function App() {
           setLoginError("");
           setTimeout(() => {
             setCurrentUser(data.user);
-            setPage(data.user.role === "admin" ? "dashboard" : "cars");
+            const defaultPage = data.user.role === "admin" ? "dashboard" : "cars";
+            if (!window.location.hash || window.location.hash === "#") {
+              window.location.hash = defaultPage;
+            } else {
+              setPage(window.location.hash.replace("#", ""));
+            }
             setLoginSuccess(false);
           }, 400);
         })
@@ -448,7 +467,7 @@ export default function App() {
     : [{ key: "settings", icon: "⚙️", label: "ตั้งค่า" }];
   const allNavItems = [...mainMenuItems, ...adminMenuItems];
 
-  const nav = (p) => { setPage(p); setMobileMenu(false); };
+  const nav = (p) => { window.location.hash = p; setMobileMenu(false); };
   const pendingCount = bookings.filter(b => b.status === "pending").length;
   const handleLogout = () => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); setMobileMenu(false); };
 
