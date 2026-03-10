@@ -993,7 +993,7 @@ function Cars({ cars, isAdmin, onBook, bookings, m, blackouts, currentUser, onTo
       <div style={{ display: "grid", gridTemplateColumns: m ? "1fr" : "repeat(3,1fr)", gap: 14 }}>
         {filtered.map(car => {
           const avail = car.status === "available";
-          const activeBookings = bookings.filter(b => b.carId === car.id && (b.status === "approved" || b.status === "pending") && new Date(b.endDate) >= new Date()).sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+          const activeBookings = bookings.filter(b => b.carId === car.id && b.status === "approved" && new Date(b.endDate) >= new Date()).sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
           const nextBooking = activeBookings[0];
 
           const isDisabled = !avail;

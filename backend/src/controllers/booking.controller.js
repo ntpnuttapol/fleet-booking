@@ -27,18 +27,18 @@ const createBooking = async (req, res) => {
 
         const userId = req.user.id;
 
-        // Limiting 1 booking per user (admins bypassed)
-        if (req.user.role !== 'admin') {
-            const activeBooking = await prisma.booking.findFirst({
-                where: {
-                    userId,
-                    status: { in: ['pending', 'approved'] },
-                    endDate: { gte: new Date().toISOString() }
-                }
-            });
-            if (activeBooking) {
-                return res.status(400).json({ error: "คุณมีการจองที่กำลังใช้งานหรือรออนุมัติอยู่แล้ว (จำกัด 1 คัน/คน)" });
+        // Check for overlapping bookings for the same car
+        const overlappingBooking = await prisma.booking.findFirst({
+            where: {
+                carId,
+                status: "approved",
+                startDate: { lt: endDate },
+                endDate: { gt: startDate }
             }
+        });
+
+        if (overlappingBooking) {
+            return res.status(400).json({ error: "รถคันนี้มีการจองที่ได้รับการอนุมัติในช่วงเวลาดังกล่าวแล้ว ไม่สามารถจองซ้ำได้" });
         }
 
         const booking = await prisma.booking.create({
