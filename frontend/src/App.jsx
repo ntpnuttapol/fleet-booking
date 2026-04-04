@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 
 // ─── Constants ───────────────────────────────────────────────
-const API_BASE = import.meta.env.DEV ? `http://${window.location.hostname}:3001` : "https://fleet-booking-app.onrender.com";
+const API_BASE = import.meta.env.DEV
+  ? `http://${window.location.hostname}:3001`
+  : (import.meta.env.VITE_API_BASE_URL || "https://fleet-booking-app.onrender.com");
 const HUB_URL = import.meta.env.VITE_HUB_URL || "https://polyfoampfs-hub.vercel.app";
 
 // ─── Helpers ─────────────────────────────────────────────────
@@ -43,6 +45,38 @@ function useWindowWidth() {
     return () => window.removeEventListener("resize", h);
   }, []);
   return w;
+}
+
+async function parseApiResponse(res, fallbackMessage) {
+  const rawText = await res.text();
+  const contentType = res.headers.get("content-type") || "";
+  let payload = null;
+
+  if (rawText) {
+    try {
+      payload = contentType.includes("application/json")
+        ? JSON.parse(rawText)
+        : JSON.parse(rawText);
+    } catch {
+      payload = null;
+    }
+  }
+
+  if (!res.ok) {
+    if (payload?.error) {
+      throw new Error(payload.error);
+    }
+
+    if (rawText.trim().startsWith("<!DOCTYPE") || rawText.trim().startsWith("<html")) {
+      throw new Error(
+        "Car Booking backend is not ready for SSO yet. Please redeploy the backend service on Render."
+      );
+    }
+
+    throw new Error(fallbackMessage);
+  }
+
+  return payload || {};
 }
 
 const font = `'Noto Sans Thai', 'DM Sans', system-ui, sans-serif`;
@@ -334,7 +368,7 @@ export default function App() {
         hub_origin: hubOrigin,
       }),
     })
-      .then(res => res.ok ? res.json() : res.json().then(err => Promise.reject(err.error || "SSO login failed")))
+      .then(res => parseApiResponse(res, "SSO login failed"))
       .then(data => {
         if (cancelled) return;
         localStorage.setItem("fleetbook_token", data.token);
@@ -370,7 +404,7 @@ export default function App() {
       fetch(`${API_BASE}/api/users/login`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(loginForm)
       })
-        .then(res => res.ok ? res.json() : res.json().then(err => Promise.reject(err.error || "Invalid email or password")))
+        .then(res => parseApiResponse(res, "Invalid email or password"))
         .then(data => {
           localStorage.setItem('fleetbook_token', data.token);
           setLoginSuccess(true);

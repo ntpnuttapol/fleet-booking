@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: fleet-booking-api
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: HUB_URL
+        value: https://polyfoampfs-hub.vercel.app
+      - key: SSO_SYSTEM_ID
+        value: booking
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
