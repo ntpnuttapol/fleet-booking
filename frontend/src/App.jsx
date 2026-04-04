@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 // ─── Constants ───────────────────────────────────────────────
 const API_BASE = import.meta.env.DEV ? `http://${window.location.hostname}:3001` : "https://fleet-booking-app.onrender.com";
+const HUB_URL = import.meta.env.VITE_HUB_URL || "https://polyfoampfs-hub.vercel.app";
 
 // ─── Helpers ─────────────────────────────────────────────────
 const STATUS_MAP = {
@@ -161,6 +162,7 @@ export default function App() {
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [loginError, setLoginError] = useState("");
   const [loginSuccess, setLoginSuccess] = useState(false);
+  const [ssoLoading, setSsoLoading] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [confirm, setConfirm] = useState(null);
@@ -169,6 +171,13 @@ export default function App() {
 
   const showToast = (msg, icon = "✅") => { setToast({ msg, icon }); setTimeout(() => setToast(null), 3000); };
   const addNotif = (n) => setNotifications(prev => [{ ...n, id: Date.now(), read: false, createdAt: new Date().toISOString() }, ...prev]);
+  const clearSsoParams = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("sso_token");
+    url.searchParams.delete("hub_origin");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  };
+  const getHubLoginUrl = () => `${HUB_URL}/login?redirect=${encodeURIComponent(window.location.origin)}`;
 
   const myNotifs = notifications.filter(n => {
     if (!currentUser) return false;
@@ -305,8 +314,59 @@ export default function App() {
     }
   }, []);
 
+  // SSO handoff from Portal Hub
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const ssoToken = searchParams.get("sso_token");
+    const hubOrigin = searchParams.get("hub_origin");
+
+    if (!ssoToken || currentUser) return undefined;
+
+    let cancelled = false;
+    setLoginError("");
+    setSsoLoading(true);
+
+    fetch(`${API_BASE}/api/users/sso`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sso_token: ssoToken,
+        hub_origin: hubOrigin,
+      }),
+    })
+      .then(res => res.ok ? res.json() : res.json().then(err => Promise.reject(err.error || "SSO login failed")))
+      .then(data => {
+        if (cancelled) return;
+        localStorage.setItem("fleetbook_token", data.token);
+        setLoginSuccess(true);
+        setTimeout(() => {
+          if (cancelled) return;
+          setCurrentUser(data.user);
+          const defaultPage = data.user.role === "admin" ? "dashboard" : "cars";
+          if (!window.location.hash || window.location.hash === "#") {
+            window.location.hash = defaultPage;
+          } else {
+            setPage(window.location.hash.replace("#", ""));
+          }
+          clearSsoParams();
+          setLoginSuccess(false);
+          setSsoLoading(false);
+        }, 400);
+      })
+      .catch(err => {
+        if (cancelled) return;
+        clearSsoParams();
+        setSsoLoading(false);
+        setLoginError(typeof err === "string" ? err : err?.message || "SSO login failed");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser]);
+
   if (!currentUser) {
-    return <LoginPage form={loginForm} setForm={setLoginForm} error={loginError} isMobile={isMobile} isSuccess={loginSuccess} onLogin={() => {
+    return <LoginPage form={loginForm} setForm={setLoginForm} error={loginError} isMobile={isMobile} isSuccess={loginSuccess} isSsoLoading={ssoLoading} hubLoginUrl={getHubLoginUrl()} onLogin={() => {
       fetch(`${API_BASE}/api/users/login`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(loginForm)
       })
@@ -612,7 +672,7 @@ function NotifBell({ unread, showPanel, toggle, notifs, markRead, markAllRead, c
 
 
 // ─── Login (Landing Page Style) ──────────────────────────────
-function LoginPage({ form, setForm, error, onLogin, isMobile, isSuccess }) {
+function LoginPage({ form, setForm, error, onLogin, isMobile, isSuccess, isSsoLoading, hubLoginUrl }) {
   return (
     <div style={{ fontFamily: font, minHeight: "100dvh", display: "flex", flexDirection: isMobile ? "column" : "row", background: "linear-gradient(135deg, #F4FAFA 0%, #E0F2F1 100%)", overflow: "hidden" }}>
 
@@ -659,13 +719,17 @@ function LoginPage({ form, setForm, error, onLogin, isMobile, isSuccess }) {
       <div style={{ flex: isMobile ? "none" : "0 0 45%", display: "flex", alignItems: "center", justifyContent: "center", padding: isMobile ? "0 20px 40px" : "40px 60px 40px 0", position: "relative", zIndex: 2 }}>
         <div style={{ width: "100%", maxWidth: 440, padding: isMobile ? "32px 24px" : "50px 44px", background: "#FFFFFF", border: `1px solid rgba(255,255,255,0.9)`, borderRadius: 32, boxShadow: "0 30px 80px rgba(0,180,159,0.12), 0 0 0 1px rgba(0,180,159,0.02)", animation: "slideUpFade 0.6s ease-out both", animationDelay: "0.2s", position: "relative", overflow: "hidden" }}>
 
-          {isSuccess ? (
+          {isSuccess || isSsoLoading ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 280, animation: "fadeIn 0.3s" }}>
               <div style={{ width: 80, height: 80, borderRadius: 40, background: C.accent, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 40, marginBottom: 24, animation: "scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both" }}>
-                ✓
+                {isSsoLoading ? "🔐" : "✓"}
               </div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: C.t1, animation: "slideUpFade 0.5s ease-out both", animationDelay: "0.2s" }}>Welcome back!</div>
-              <div style={{ fontSize: 14, color: C.t2, marginTop: 8, fontWeight: 500, animation: "slideUpFade 0.5s ease-out both", animationDelay: "0.3s" }}>Redirecting...</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: C.t1, animation: "slideUpFade 0.5s ease-out both", animationDelay: "0.2s" }}>
+                {isSsoLoading ? "Connecting with Hub..." : "Welcome back!"}
+              </div>
+              <div style={{ fontSize: 14, color: C.t2, marginTop: 8, fontWeight: 500, animation: "slideUpFade 0.5s ease-out both", animationDelay: "0.3s" }}>
+                {isSsoLoading ? "Verifying your Portal access for Car Booking" : "Redirecting..."}
+              </div>
             </div>
           ) : (
             <>
@@ -674,6 +738,33 @@ function LoginPage({ form, setForm, error, onLogin, isMobile, isSuccess }) {
                 <div style={{ fontSize: 14, color: C.t2, fontWeight: 500 }}>Enter your email and password to continue</div>
               </div>
               {error && <div style={{ background: "rgba(255,59,48,0.08)", border: "1px solid rgba(255,59,48,0.2)", borderRadius: 14, padding: "12px 16px", marginBottom: 20, color: C.danger, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}><span style={{ fontSize: 16 }}>⚠️</span> {error}</div>}
+              <a
+                href={hubLoginUrl}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  padding: "14px",
+                  marginBottom: 16,
+                  background: "#0f172a",
+                  color: "#fff",
+                  textDecoration: "none",
+                  borderRadius: 14,
+                  fontSize: 14,
+                  fontWeight: 800,
+                  boxShadow: "0 10px 24px rgba(15,23,42,0.18)"
+                }}
+              >
+                <span>🔐</span>
+                <span>Sign in with PFS Portal Hub</span>
+              </a>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+                <div style={{ flex: 1, height: 1, background: C.border }} />
+                <span style={{ fontSize: 12, color: C.t3, fontWeight: 700 }}>or use local account</span>
+                <div style={{ flex: 1, height: 1, background: C.border }} />
+              </div>
               <div style={{ marginBottom: 20 }}>
                 <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: C.t2, marginBottom: 8 }}>Email Address</label>
                 <input value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} placeholder="email@company.com" style={{ width: "100%", padding: "14px 16px", background: "#F4FAFA", border: `2px solid transparent`, borderRadius: 14, color: C.t1, fontSize: 14, fontFamily: font, transition: "0.2s" }} onFocus={e => { e.target.style.background = "#fff"; e.target.style.borderColor = C.accent; }} onBlur={e => { e.target.style.background = "#F4FAFA"; e.target.style.borderColor = "transparent"; }} />
