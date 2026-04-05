@@ -1,4 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Component } from "react";
+
+// Debug error boundary to isolate crashes
+class SafeSection extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    if (this.state.error) return (
+      <div style={{ padding: 16, margin: 8, background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 12, fontSize: 13 }}>
+        <strong style={{ color: '#DC2626' }}>Error in: {this.props.name}</strong>
+        <pre style={{ fontSize: 11, marginTop: 8, whiteSpace: 'pre-wrap', color: '#666' }}>{String(this.state.error)}</pre>
+        {this.props.debugData && <pre style={{ fontSize: 10, marginTop: 4, color: '#999' }}>Data: {JSON.stringify(this.props.debugData, null, 2).substring(0, 500)}</pre>}
+      </div>
+    );
+    return this.props.children;
+  }
+}
 
 // ─── Constants ───────────────────────────────────────────────
 const API_BASE = import.meta.env.DEV
@@ -578,6 +594,7 @@ export default function App() {
   return (
     <div style={{ fontFamily: font, display: "flex", flexDirection: "column", height: "100dvh", background: C.bg, color: C.t1, overflow: "hidden" }}>
       {/* Top Navbar */}
+      <SafeSection name="Navbar" debugData={{ userName: currentUser?.name, userRole: currentUser?.role, page }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: isMobile ? "10px 16px" : "0 32px", background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.border}`, height: isMobile ? "auto" : 64, position: "sticky", top: 0, zIndex: 100, flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 36 }}>
           {isMobile && <button onClick={() => setMobileMenu(true)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 24, color: C.t1 }}>☰</button>}
@@ -632,6 +649,7 @@ export default function App() {
           )}
         </div>
       </div>
+      </SafeSection>
 
       {/* Main Content */}
       <div style={{ flex: 1, overflowX: "hidden", overflowY: "auto", minWidth: 0 }}>
@@ -642,14 +660,14 @@ export default function App() {
               <div style={{ fontSize: 15, fontWeight: 600 }}>กำลังอัปเดตข้อมูล...</div>
             </div>
           ) : (<>
-            {page === "dashboard" && isAdmin && <Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} />}
-            {page === "calendar" && <Calendar bookings={bookings} cars={cars} users={users} m={isMobile} blackouts={blackoutDates} isAdmin={isAdmin} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
-            {page === "cars" && <Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setCarFormModal({})} onEditCarClick={c => setCarFormModal(c)} />}
-            {page === "bookings" && isAdmin && <Bookings bookings={bookings} cars={cars} users={users} onApprove={handleApprove} onReject={handleReject} onCancel={handleCancel} m={isMobile} />}
-            {page === "mybookings" && <MyBookings bookings={myBookings} cars={cars} onCancel={handleCancel} m={isMobile} />}
-            {page === "users" && isAdmin && <UsersManage users={users} setUsers={setUsers} m={isMobile} />}
-            {page === "reports" && isAdmin && <Reports bookings={bookings} cars={cars} users={users} m={isMobile} />}
-            {page === "settings" && <Settings currentUser={currentUser} onUpdate={handleUpdateUser} onChangePassword={handleChangePassword} m={isMobile} isAdmin={isAdmin} blackouts={blackoutDates} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
+            {page === "dashboard" && isAdmin && <SafeSection name="Dashboard" debugData={{ bookingsLen: bookings.length, carsLen: cars.length, usersLen: users.length, firstBooking: bookings[0], firstCar: cars[0] }}><Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} /></SafeSection>}
+            {page === "calendar" && <SafeSection name="Calendar"><Calendar bookings={bookings} cars={cars} users={users} m={isMobile} blackouts={blackoutDates} isAdmin={isAdmin} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} /></SafeSection>}
+            {page === "cars" && <SafeSection name="Cars"><Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setCarFormModal({})} onEditCarClick={c => setCarFormModal(c)} /></SafeSection>}
+            {page === "bookings" && isAdmin && <SafeSection name="Bookings"><Bookings bookings={bookings} cars={cars} users={users} onApprove={handleApprove} onReject={handleReject} onCancel={handleCancel} m={isMobile} /></SafeSection>}
+            {page === "mybookings" && <SafeSection name="MyBookings"><MyBookings bookings={myBookings} cars={cars} onCancel={handleCancel} m={isMobile} /></SafeSection>}
+            {page === "users" && isAdmin && <SafeSection name="UsersManage"><UsersManage users={users} setUsers={setUsers} m={isMobile} /></SafeSection>}
+            {page === "reports" && isAdmin && <SafeSection name="Reports"><Reports bookings={bookings} cars={cars} users={users} m={isMobile} /></SafeSection>}
+            {page === "settings" && <SafeSection name="Settings" debugData={{ currentUser }}><Settings currentUser={currentUser} onUpdate={handleUpdateUser} onChangePassword={handleChangePassword} m={isMobile} isAdmin={isAdmin} blackouts={blackoutDates} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} /></SafeSection>}
           </>)}
         </div>
       </div>
