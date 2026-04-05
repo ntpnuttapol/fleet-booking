@@ -199,7 +199,9 @@ export default function App() {
   const [ssoLoading, setSsoLoading] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [confirm, setConfirm] = useState(null);
+  const userMenuRef = useRef(null);
   const width = useWindowWidth();
   const isMobile = width < 768;
 
@@ -563,7 +565,15 @@ export default function App() {
 
   const nav = (p) => { window.location.hash = p; setMobileMenu(false); };
   const pendingCount = bookings.filter(b => b.status === "pending").length;
-  const handleLogout = () => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); setMobileMenu(false); };
+  const handleLogout = () => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); setMobileMenu(false); setShowUserMenu(false); };
+  const handleBackToPortal = () => { setShowUserMenu(false); window.location.href = HUB_URL; };
+
+  // Close user menu on click outside
+  useEffect(() => {
+    const handler = (e) => { if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setShowUserMenu(false); };
+    if (showUserMenu) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showUserMenu]);
 
   return (
     <div style={{ fontFamily: font, display: "flex", flexDirection: "column", height: "100dvh", background: C.bg, color: C.t1, overflow: "hidden" }}>
@@ -591,10 +601,33 @@ export default function App() {
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <NotifBell unread={unread} showPanel={showNotif} toggle={() => setShowNotif(!showNotif)} notifs={myNotifs} markRead={markRead} markAllRead={markAllRead} close={() => setShowNotif(false)} isMobile={isMobile} />
           {!isMobile && (
-            <div onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 14px 6px 6px", borderRadius: 100, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "#C9B8DB"; e.currentTarget.style.background = "#F4F0F8"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = "#fff"; }}>
-              <div style={{ width: 32, height: 32, background: "linear-gradient(135deg, #F5C4AB, #F0B0C4)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>{currentUser.name?.substring(0, 2)}</div>
-              <span style={{ fontSize: 13, fontWeight: 600, color: "#4A433C" }}>{currentUser.name}</span>
-              <span style={{ fontSize: 10, color: "#B8AFA6", marginLeft: 2 }}>▼</span>
+            <div ref={userMenuRef} style={{ position: "relative" }}>
+              <div onClick={() => setShowUserMenu(prev => !prev)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 14px 6px 6px", borderRadius: 100, border: `1.5px solid ${showUserMenu ? "#C9B8DB" : C.border}`, background: showUserMenu ? "#F4F0F8" : "#fff", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "#C9B8DB"; e.currentTarget.style.background = "#F4F0F8"; }} onMouseLeave={e => { if (!showUserMenu) { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = "#fff"; } }}>
+                <div style={{ width: 32, height: 32, background: "linear-gradient(135deg, #F5C4AB, #F0B0C4)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>{currentUser.name?.substring(0, 2)}</div>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "#4A433C" }}>{currentUser.name}</span>
+                <span style={{ fontSize: 10, color: "#B8AFA6", marginLeft: 2, transform: showUserMenu ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }}>▼</span>
+              </div>
+              {showUserMenu && (
+                <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, width: 220, background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: "0 12px 40px rgba(0,0,0,0.12)", overflow: "hidden", animation: "scaleIn 0.15s ease", zIndex: 200 }}>
+                  <div style={{ padding: "14px 16px", borderBottom: `1px solid ${C.border}` }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>{currentUser.name}</div>
+                    <div style={{ fontSize: 11, color: C.t3, marginTop: 2 }}>{currentUser.email || currentUser.username}</div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: C.accent, marginTop: 4, textTransform: "uppercase" }}>{currentUser.role}</div>
+                  </div>
+                  <div style={{ padding: "6px" }}>
+                    <button onClick={handleBackToPortal} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", border: "none", borderRadius: 10, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: C.t1, fontFamily: font, transition: "background 0.15s" }} onMouseEnter={e => e.currentTarget.style.background = "#F4F0F8"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                      <span style={{ fontSize: 16 }}>🏠</span> กลับไปที่ Portal Hub
+                    </button>
+                    <button onClick={() => { setShowUserMenu(false); nav("settings"); }} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", border: "none", borderRadius: 10, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: C.t1, fontFamily: font, transition: "background 0.15s" }} onMouseEnter={e => e.currentTarget.style.background = "#F4F0F8"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                      <span style={{ fontSize: 16 }}>⚙️</span> ตั้งค่า
+                    </button>
+                    <div style={{ height: 1, background: C.border, margin: "4px 0" }} />
+                    <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", border: "none", borderRadius: 10, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: C.danger, fontFamily: font, transition: "background 0.15s" }} onMouseEnter={e => e.currentTarget.style.background = "#FEF2F2"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                      <span style={{ fontSize: 16 }}>🚪</span> ออกจากระบบ
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -643,6 +676,7 @@ export default function App() {
                 <div style={{ width: 36, height: 36, background: "linear-gradient(135deg, #F5C4AB, #F0B0C4)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700 }}>{currentUser.name?.substring(0, 2)}</div>
                 <div><div style={{ fontSize: 16, fontWeight: 700, color: C.t1 }}>{currentUser.name}</div><div style={{ fontSize: 13, color: C.t3 }}>{currentUser.department}</div></div>
               </div>
+              <button onClick={handleBackToPortal} style={{ width: "100%", padding: "14px", border: `1px solid ${C.border}`, borderRadius: 12, background: "#F4F0F8", color: "#4A3D5C", cursor: "pointer", fontSize: 15, fontFamily: font, fontWeight: 700, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>🏠 กลับไปที่ Portal Hub</button>
               <button onClick={handleLogout} style={{ width: "100%", padding: "14px", border: `1px solid rgba(239,68,68,0.2)`, borderRadius: 12, background: "#FCF0F3", color: "#9C4462", cursor: "pointer", fontSize: 15, fontFamily: font, fontWeight: 700 }}>ออกจากระบบ</button>
             </div>
           </div>
