@@ -610,9 +610,9 @@ export default function App() {
               {showUserMenu && (
                 <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, width: 220, background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: "0 12px 40px rgba(0,0,0,0.12)", overflow: "hidden", animation: "scaleIn 0.15s ease", zIndex: 200 }}>
                   <div style={{ padding: "14px 16px", borderBottom: `1px solid ${C.border}` }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>{currentUser.name}</div>
-                    <div style={{ fontSize: 11, color: C.t3, marginTop: 2 }}>{currentUser.email || currentUser.username}</div>
-                    <div style={{ fontSize: 10, fontWeight: 600, color: C.accent, marginTop: 4, textTransform: "uppercase" }}>{currentUser.role}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>{String(currentUser.name || '')}</div>
+                    <div style={{ fontSize: 11, color: C.t3, marginTop: 2 }}>{String(currentUser.email || currentUser.username || '')}</div>
+                    <div style={{ fontSize: 10, fontWeight: 600, color: C.accent, marginTop: 4, textTransform: "uppercase" }}>{String(currentUser.role || 'user')}</div>
                   </div>
                   <div style={{ padding: "6px" }}>
                     <button onClick={handleBackToPortal} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", border: "none", borderRadius: 10, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: C.t1, fontFamily: font, transition: "background 0.15s" }} onMouseEnter={e => e.currentTarget.style.background = "#F4F0F8"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>

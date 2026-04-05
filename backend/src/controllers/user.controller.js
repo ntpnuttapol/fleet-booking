@@ -253,11 +253,18 @@ const loginWithSso = async (req, res) => {
         );
 
         const token = generateToken(localUser);
-        const { password: _password, ...userData } = localUser;
 
         return res.json({
             token,
-            user: userData,
+            user: {
+                id: localUser.id,
+                name: localUser.name,
+                username: localUser.username,
+                email: localUser.email || null,
+                department: localUser.department || null,
+                role: localUser.role,
+                avatar: localUser.avatar || '👤',
+            },
             autoProvisioned,
         });
     } catch (error) {
