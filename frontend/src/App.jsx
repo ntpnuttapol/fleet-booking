@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 // ─── Constants ───────────────────────────────────────────────
 const API_BASE = import.meta.env.DEV
   ? `http://${window.location.hostname}:3001`
-  : (import.meta.env.VITE_API_BASE_URL || "https://fleet-booking-app.onrender.com");
+  : (import.meta.env.VITE_API_BASE_URL || "https://fleet-booking.onrender.com");
 const HUB_URL = import.meta.env.VITE_HUB_URL || "https://polyfoampfs-hub.vercel.app";
 
 // ─── Helpers ─────────────────────────────────────────────────
