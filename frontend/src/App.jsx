@@ -352,8 +352,11 @@ export default function App() {
     return () => eventSource.close();
   }, [currentUser]);
 
-  // Session Restore
+  // Session Restore (skip if SSO token is present — let SSO flow handle it)
   useEffect(() => {
+    const hasSsoToken = new URLSearchParams(window.location.search).has("sso_token");
+    if (hasSsoToken) return; // SSO flow will handle authentication
+
     const token = localStorage.getItem('fleetbook_token');
     if (token && !currentUser) {
       fetch(`${API_BASE}/api/users/me`, { headers: { "Authorization": `Bearer ${token}` } })
