@@ -1,20 +1,4 @@
-import { useState, useEffect, useRef, Component } from "react";
-
-// Debug error boundary to isolate crashes
-class SafeSection extends Component {
-  constructor(props) { super(props); this.state = { error: null }; }
-  static getDerivedStateFromError(error) { return { error }; }
-  render() {
-    if (this.state.error) return (
-      <div style={{ padding: 16, margin: 8, background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 12, fontSize: 13 }}>
-        <strong style={{ color: '#DC2626' }}>Error in: {this.props.name}</strong>
-        <pre style={{ fontSize: 11, marginTop: 8, whiteSpace: 'pre-wrap', color: '#666' }}>{String(this.state.error)}</pre>
-        {this.props.debugData && <pre style={{ fontSize: 10, marginTop: 4, color: '#999' }}>Data: {JSON.stringify(this.props.debugData, null, 2).substring(0, 500)}</pre>}
-      </div>
-    );
-    return this.props.children;
-  }
-}
+import { useState, useEffect, useRef } from "react";
 
 // ─── Constants ───────────────────────────────────────────────
 const API_BASE = import.meta.env.DEV
@@ -61,38 +45,6 @@ function useWindowWidth() {
     return () => window.removeEventListener("resize", h);
   }, []);
   return w;
-}
-
-async function parseApiResponse(res, fallbackMessage) {
-  const rawText = await res.text();
-  const contentType = res.headers.get("content-type") || "";
-  let payload = null;
-
-  if (rawText) {
-    try {
-      payload = contentType.includes("application/json")
-        ? JSON.parse(rawText)
-        : JSON.parse(rawText);
-    } catch {
-      payload = null;
-    }
-  }
-
-  if (!res.ok) {
-    if (payload?.error) {
-      throw new Error(payload.error);
-    }
-
-    if (rawText.trim().startsWith("<!DOCTYPE") || rawText.trim().startsWith("<html")) {
-      throw new Error(
-        "Car Booking backend is not ready for SSO yet. Please redeploy the backend service on Render."
-      );
-    }
-
-    throw new Error(fallbackMessage);
-  }
-
-  return payload || {};
 }
 
 const font = `'Noto Sans Thai', 'DM Sans', system-ui, sans-serif`;
@@ -215,9 +167,7 @@ export default function App() {
   const [ssoLoading, setSsoLoading] = useState(false);
   const [showNotif, setShowNotif] = useState(false);
   const [mobileMenu, setMobileMenu] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [confirm, setConfirm] = useState(null);
-  const userMenuRef = useRef(null);
   const width = useWindowWidth();
   const isMobile = width < 768;
 
@@ -355,7 +305,7 @@ export default function App() {
   // Session Restore (skip if SSO token is present — let SSO flow handle it)
   useEffect(() => {
     const hasSsoToken = new URLSearchParams(window.location.search).has("sso_token");
-    if (hasSsoToken) return; // SSO flow will handle authentication
+    if (hasSsoToken) return;
 
     const token = localStorage.getItem('fleetbook_token');
     if (token && !currentUser) {
@@ -389,7 +339,7 @@ export default function App() {
         hub_origin: hubOrigin,
       }),
     })
-      .then(res => parseApiResponse(res, "SSO login failed"))
+      .then(res => res.ok ? res.json() : res.json().then(err => Promise.reject(err.error || "SSO login failed")))
       .then(data => {
         if (cancelled) return;
         localStorage.setItem("fleetbook_token", data.token);
@@ -425,7 +375,7 @@ export default function App() {
       fetch(`${API_BASE}/api/users/login`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(loginForm)
       })
-        .then(res => parseApiResponse(res, "Invalid email or password"))
+        .then(res => res.ok ? res.json() : res.json().then(err => Promise.reject(err.error || "Invalid email or password")))
         .then(data => {
           localStorage.setItem('fleetbook_token', data.token);
           setLoginSuccess(true);
@@ -584,20 +534,11 @@ export default function App() {
 
   const nav = (p) => { window.location.hash = p; setMobileMenu(false); };
   const pendingCount = bookings.filter(b => b.status === "pending").length;
-  const handleLogout = () => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); setMobileMenu(false); setShowUserMenu(false); };
-  const handleBackToPortal = () => { setShowUserMenu(false); window.location.href = HUB_URL; };
-
-  // Close user menu on click outside
-  useEffect(() => {
-    const handler = (e) => { if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setShowUserMenu(false); };
-    if (showUserMenu) document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [showUserMenu]);
+  const handleLogout = () => { localStorage.removeItem('fleetbook_token'); setCurrentUser(null); setLoginForm({ email: "", password: "" }); setShowNotif(false); setMobileMenu(false); };
 
   return (
     <div style={{ fontFamily: font, display: "flex", flexDirection: "column", height: "100dvh", background: C.bg, color: C.t1, overflow: "hidden" }}>
       {/* Top Navbar */}
-      <SafeSection name="Navbar" debugData={{ userName: currentUser?.name, userRole: currentUser?.role, page }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: isMobile ? "10px 16px" : "0 32px", background: "rgba(255,255,255,0.92)", backdropFilter: "blur(20px)", borderBottom: `1px solid ${C.border}`, height: isMobile ? "auto" : 64, position: "sticky", top: 0, zIndex: 100, flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 12 : 36 }}>
           {isMobile && <button onClick={() => setMobileMenu(true)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 24, color: C.t1 }}>☰</button>}
@@ -621,38 +562,16 @@ export default function App() {
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <NotifBell unread={unread} showPanel={showNotif} toggle={() => setShowNotif(!showNotif)} notifs={myNotifs} markRead={markRead} markAllRead={markAllRead} close={() => setShowNotif(false)} isMobile={isMobile} />
           {!isMobile && (
-            <div ref={userMenuRef} style={{ position: "relative" }}>
-              <div onClick={() => setShowUserMenu(prev => !prev)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 14px 6px 6px", borderRadius: 100, border: `1.5px solid ${showUserMenu ? "#C9B8DB" : C.border}`, background: showUserMenu ? "#F4F0F8" : "#fff", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "#C9B8DB"; e.currentTarget.style.background = "#F4F0F8"; }} onMouseLeave={e => { if (!showUserMenu) { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = "#fff"; } }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <a href={HUB_URL} style={{ fontSize: 12, color: "#6B5B7B", textDecoration: "none", padding: "6px 12px", borderRadius: 8, border: `1px solid ${C.border}`, background: "#F4F0F8", fontWeight: 600, transition: "all 0.2s" }} onMouseEnter={e => e.currentTarget.style.background = "#E8E0F0"} onMouseLeave={e => e.currentTarget.style.background = "#F4F0F8"}>🏠 Portal</a>
+              <div onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 14px 6px 6px", borderRadius: 100, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={e => { e.currentTarget.style.borderColor = "#C9B8DB"; e.currentTarget.style.background = "#F4F0F8"; }} onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.background = "#fff"; }}>
                 <div style={{ width: 32, height: 32, background: "linear-gradient(135deg, #F5C4AB, #F0B0C4)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 12, fontWeight: 700 }}>{currentUser.name?.substring(0, 2)}</div>
                 <span style={{ fontSize: 13, fontWeight: 600, color: "#4A433C" }}>{currentUser.name}</span>
-                <span style={{ fontSize: 10, color: "#B8AFA6", marginLeft: 2, transform: showUserMenu ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }}>▼</span>
               </div>
-              {showUserMenu && (
-                <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, width: 220, background: "#fff", borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: "0 12px 40px rgba(0,0,0,0.12)", overflow: "hidden", animation: "scaleIn 0.15s ease", zIndex: 200 }}>
-                  <div style={{ padding: "14px 16px", borderBottom: `1px solid ${C.border}` }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: C.t1 }}>{String(currentUser.name || '')}</div>
-                    <div style={{ fontSize: 11, color: C.t3, marginTop: 2 }}>{String(currentUser.email || currentUser.username || '')}</div>
-                    <div style={{ fontSize: 10, fontWeight: 600, color: C.accent, marginTop: 4, textTransform: "uppercase" }}>{String(currentUser.role || 'user')}</div>
-                  </div>
-                  <div style={{ padding: "6px" }}>
-                    <button onClick={handleBackToPortal} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", border: "none", borderRadius: 10, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: C.t1, fontFamily: font, transition: "background 0.15s" }} onMouseEnter={e => e.currentTarget.style.background = "#F4F0F8"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                      <span style={{ fontSize: 16 }}>🏠</span> กลับไปที่ Portal Hub
-                    </button>
-                    <button onClick={() => { setShowUserMenu(false); nav("settings"); }} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", border: "none", borderRadius: 10, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: C.t1, fontFamily: font, transition: "background 0.15s" }} onMouseEnter={e => e.currentTarget.style.background = "#F4F0F8"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                      <span style={{ fontSize: 16 }}>⚙️</span> ตั้งค่า
-                    </button>
-                    <div style={{ height: 1, background: C.border, margin: "4px 0" }} />
-                    <button onClick={handleLogout} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "10px 12px", border: "none", borderRadius: 10, background: "transparent", cursor: "pointer", fontSize: 13, fontWeight: 500, color: C.danger, fontFamily: font, transition: "background 0.15s" }} onMouseEnter={e => e.currentTarget.style.background = "#FEF2F2"} onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                      <span style={{ fontSize: 16 }}>🚪</span> ออกจากระบบ
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>
       </div>
-      </SafeSection>
 
       {/* Main Content */}
       <div style={{ flex: 1, overflowX: "hidden", overflowY: "auto", minWidth: 0 }}>
@@ -663,14 +582,14 @@ export default function App() {
               <div style={{ fontSize: 15, fontWeight: 600 }}>กำลังอัปเดตข้อมูล...</div>
             </div>
           ) : (<>
-            {page === "dashboard" && isAdmin && <SafeSection name="Dashboard" debugData={{ bookingsLen: bookings.length, carsLen: cars.length, usersLen: users.length, firstBooking: bookings[0], firstCar: cars[0] }}><Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} /></SafeSection>}
-            {page === "calendar" && <SafeSection name="Calendar"><Calendar bookings={bookings} cars={cars} users={users} m={isMobile} blackouts={blackoutDates} isAdmin={isAdmin} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} /></SafeSection>}
-            {page === "cars" && <SafeSection name="Cars"><Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setCarFormModal({})} onEditCarClick={c => setCarFormModal(c)} /></SafeSection>}
-            {page === "bookings" && isAdmin && <SafeSection name="Bookings"><Bookings bookings={bookings} cars={cars} users={users} onApprove={handleApprove} onReject={handleReject} onCancel={handleCancel} m={isMobile} /></SafeSection>}
-            {page === "mybookings" && <SafeSection name="MyBookings"><MyBookings bookings={myBookings} cars={cars} onCancel={handleCancel} m={isMobile} /></SafeSection>}
-            {page === "users" && isAdmin && <SafeSection name="UsersManage"><UsersManage users={users} setUsers={setUsers} m={isMobile} /></SafeSection>}
-            {page === "reports" && isAdmin && <SafeSection name="Reports"><Reports bookings={bookings} cars={cars} users={users} m={isMobile} /></SafeSection>}
-            {page === "settings" && <SafeSection name="Settings" debugData={{ currentUser }}><Settings currentUser={currentUser} onUpdate={handleUpdateUser} onChangePassword={handleChangePassword} m={isMobile} isAdmin={isAdmin} blackouts={blackoutDates} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} /></SafeSection>}
+            {page === "dashboard" && isAdmin && <Dashboard bookings={bookings} cars={cars} users={users} m={isMobile} />}
+            {page === "calendar" && <Calendar bookings={bookings} cars={cars} users={users} m={isMobile} blackouts={blackoutDates} isAdmin={isAdmin} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
+            {page === "cars" && <Cars cars={cars} isAdmin={isAdmin} onBook={c => setBookingModal(c)} bookings={bookings} m={isMobile} blackouts={blackoutDates} currentUser={currentUser} onToggleCarStatus={handleToggleCarStatus} onAddCarClick={() => setCarFormModal({})} onEditCarClick={c => setCarFormModal(c)} />}
+            {page === "bookings" && isAdmin && <Bookings bookings={bookings} cars={cars} users={users} onApprove={handleApprove} onReject={handleReject} onCancel={handleCancel} m={isMobile} />}
+            {page === "mybookings" && <MyBookings bookings={myBookings} cars={cars} onCancel={handleCancel} m={isMobile} />}
+            {page === "users" && isAdmin && <UsersManage users={users} setUsers={setUsers} m={isMobile} />}
+            {page === "reports" && isAdmin && <Reports bookings={bookings} cars={cars} users={users} m={isMobile} />}
+            {page === "settings" && <Settings currentUser={currentUser} onUpdate={handleUpdateUser} onChangePassword={handleChangePassword} m={isMobile} isAdmin={isAdmin} blackouts={blackoutDates} onAddBlackout={handleAddBlackout} onRemoveBlackout={handleRemoveBlackout} />}
           </>)}
         </div>
       </div>
@@ -697,7 +616,6 @@ export default function App() {
                 <div style={{ width: 36, height: 36, background: "linear-gradient(135deg, #F5C4AB, #F0B0C4)", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 700 }}>{currentUser.name?.substring(0, 2)}</div>
                 <div><div style={{ fontSize: 16, fontWeight: 700, color: C.t1 }}>{currentUser.name}</div><div style={{ fontSize: 13, color: C.t3 }}>{currentUser.department}</div></div>
               </div>
-              <button onClick={handleBackToPortal} style={{ width: "100%", padding: "14px", border: `1px solid ${C.border}`, borderRadius: 12, background: "#F4F0F8", color: "#4A3D5C", cursor: "pointer", fontSize: 15, fontFamily: font, fontWeight: 700, marginBottom: 8, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>🏠 กลับไปที่ Portal Hub</button>
               <button onClick={handleLogout} style={{ width: "100%", padding: "14px", border: `1px solid rgba(239,68,68,0.2)`, borderRadius: 12, background: "#FCF0F3", color: "#9C4462", cursor: "pointer", fontSize: 15, fontFamily: font, fontWeight: 700 }}>ออกจากระบบ</button>
             </div>
           </div>
