@@ -1,4 +1,4 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient, Prisma } = require('@prisma/client');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const { generateToken } = require('../middleware/auth.middleware');
@@ -108,6 +108,16 @@ async function findExistingSsoUser({ email, usernameCandidates }) {
     });
 }
 
+function isPrismaUniqueError(error) {
+    return error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002';
+}
+
+function getUniqueTargets(error) {
+    if (!isPrismaUniqueError(error)) return [];
+    const targets = error.meta?.target;
+    return Array.isArray(targets) ? targets : [];
+}
+
 async function createUniqueUsername(usernameCandidates) {
     const baseUsername = usernameCandidates[0] || `booking-user-${Date.now()}`;
 
@@ -146,32 +156,82 @@ async function findOrProvisionSsoUser(hubEmail, hubMetadata = {}) {
         }
 
         if (Object.keys(updateData).length > 0) {
-            const updatedUser = await prisma.user.update({
-                where: { id: existingUser.id },
-                data: updateData,
-            });
-            return { user: updatedUser, autoProvisioned: false };
+            try {
+                const updatedUser = await prisma.user.update({
+                    where: { id: existingUser.id },
+                    data: updateData,
+                });
+                return { user: updatedUser, autoProvisioned: false };
+            } catch (error) {
+                const uniqueTargets = getUniqueTargets(error);
+
+                // If the hub email is already claimed by another fleet account,
+                // keep the existing account usable and skip the email sync.
+                if (uniqueTargets.includes('email') && updateData.email) {
+                    delete updateData.email;
+
+                    if (Object.keys(updateData).length === 0) {
+                        return { user: existingUser, autoProvisioned: false };
+                    }
+
+                    const updatedUser = await prisma.user.update({
+                        where: { id: existingUser.id },
+                        data: updateData,
+                    });
+                    return { user: updatedUser, autoProvisioned: false };
+                }
+
+                throw error;
+            }
         }
 
         return { user: existingUser, autoProvisioned: false };
     }
 
-    const username = await createUniqueUsername(identity.usernameCandidates);
+    let username = await createUniqueUsername(identity.usernameCandidates);
+    let email = identity.email;
     const randomPassword = crypto.randomBytes(24).toString('hex');
     const passwordHash = await bcrypt.hash(randomPassword, 10);
 
-    const createdUser = await prisma.user.create({
-        data: {
-            username,
-            email: identity.email,
-            password: passwordHash,
-            name: identity.fullName,
-            department: identity.department,
-            role: 'user',
-            avatar: '👤',
-        },
-    });
-    return { user: createdUser, autoProvisioned: true };
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+            const createdUser = await prisma.user.create({
+                data: {
+                    username,
+                    email,
+                    password: passwordHash,
+                    name: identity.fullName,
+                    department: identity.department,
+                    role: 'user',
+                    avatar: '👤',
+                },
+            });
+            return { user: createdUser, autoProvisioned: true };
+        } catch (error) {
+            const uniqueTargets = getUniqueTargets(error);
+
+            if (!isPrismaUniqueError(error)) {
+                throw error;
+            }
+
+            if ((uniqueTargets.length === 0 || uniqueTargets.includes('email')) && email) {
+                email = null;
+                continue;
+            }
+
+            if (uniqueTargets.length === 0 || uniqueTargets.includes('username')) {
+                username = await createUniqueUsername([
+                    ...identity.usernameCandidates,
+                    `booking-user-${Date.now() + attempt}`,
+                ]);
+                continue;
+            }
+
+            throw error;
+        }
+    }
+
+    throw new Error('Unable to provision SSO user after retry');
 }
 
 const getUsers = async (req, res) => {
@@ -268,7 +328,11 @@ const loginWithSso = async (req, res) => {
             autoProvisioned,
         });
     } catch (error) {
-        console.error('SSO login error:', error);
+        console.error('SSO login error:', {
+            message: error?.message,
+            code: error?.code,
+            meta: error?.meta,
+        });
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
